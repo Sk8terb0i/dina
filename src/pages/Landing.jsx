@@ -79,9 +79,10 @@ export default function Landing() {
       const isMobile = window.innerWidth <= 768;
       const threshold = isMobile ? MOBILE_SCROLL_FLIP_THRESHOLD : 20;
 
+      // Fixes desktop reverse scroll: seamlessly toggles back when scrolling above threshold
       if (window.scrollY > threshold) {
         setIsScrolled(true);
-      } else if (window.scrollY <= 0) {
+      } else {
         setIsScrolled(false);
       }
 
@@ -92,7 +93,7 @@ export default function Landing() {
       }
     };
 
-    // INSTANT TOUCH-DRAG DETECTION FOR MOBILE (Bypasses mobile rubber-band delay)
+    // INSTANT TOUCH-DRAG DETECTION FOR MOBILE
     const handleTouchStart = (e) => {
       if (window.innerWidth <= 768 && e.touches.length > 0) {
         touchStartY.current = e.touches[0].clientY;
@@ -104,10 +105,9 @@ export default function Landing() {
         const currentY = e.touches[0].clientY;
         const dragDistance = touchStartY.current - currentY; // positive = dragging finger UP (scrolling down)
 
-        // Trigger flip immediately on 2px of touch drag
         if (dragDistance > 2) {
           setIsScrolled(true);
-        } else if (dragDistance < -10 && window.scrollY < 10) {
+        } else if (dragDistance < -5 || window.scrollY <= 2) {
           setIsScrolled(false);
         }
       }
