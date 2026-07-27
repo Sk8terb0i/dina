@@ -65,9 +65,10 @@ export default function Header() {
             top: 0;
             left: 0;
             right: 0;
-            width: 100%;
+            width: 100vw;
+            max-width: 100%;
             box-sizing: border-box !important;
-            padding: 2rem;
+            padding: 1.5rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -78,7 +79,7 @@ export default function Header() {
           }
 
           .site-header.scrolled {
-            padding: 1.2rem 2rem;
+            padding: 1rem 2rem;
             background-color: rgba(159, 184, 163, 0.92);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
@@ -86,15 +87,23 @@ export default function Header() {
           }
 
           .brand-link {
+            display: block;
+            flex: 1 1 auto;
+            min-width: 0 !important; /* CRITICAL: Allows text to shrink in flexbox */
             font-size: 1.1rem;
             letter-spacing: 0.5px;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             cursor: pointer;
+            text-decoration: none;
+            color: inherit;
           }
 
           .nav-menu {
             display: flex;
             gap: 2.5rem;
+            flex-shrink: 0;
           }
 
           .nav-link {
@@ -132,10 +141,11 @@ export default function Header() {
             background: transparent;
             border: none;
             cursor: pointer;
-            padding: 0.5rem;
+            padding: 0.4rem;
             color: var(--text, #13256d);
             z-index: 101;
-            flex-shrink: 0 !important;
+            flex: 0 0 auto !important; /* Never shrink or push away */
+            margin-left: 0.75rem;
             -webkit-tap-highlight-color: transparent;
           }
 
@@ -143,23 +153,19 @@ export default function Header() {
             display: none;
           }
 
-          /* Mobile Responsive Fixes */
+          /* Mobile Responsive Adjustments (<= 768px) */
           @media (max-width: 768px) {
             .site-header {
-              padding: 1rem 1rem !important;
+              padding: 1rem 1.25rem !important;
             }
 
             .site-header.scrolled {
-              padding: 0.85rem 1rem !important;
+              padding: 0.85rem 1.25rem !important;
             }
 
             .brand-link {
-              font-size: clamp(0.68rem, 3.3vw, 0.9rem) !important;
-              font-weight: 400 !important; 
-              white-space: nowrap !important; 
-              overflow: hidden !important;
-              text-overflow: ellipsis !important;
-              margin-right: 0.5rem !important;
+              font-size: clamp(0.78rem, 3.8vw, 0.95rem) !important;
+              font-weight: 500 !important;
             }
 
             .nav-menu {
@@ -210,7 +216,7 @@ export default function Header() {
       </style>
 
       {/* Brand Title */}
-      <a href="/" onClick={handleHomeClick} className="nav-link brand-link">
+      <a href="/" onClick={handleHomeClick} className="brand-link">
         Dina Galizzi Psychosoziale Beratung
       </a>
 
