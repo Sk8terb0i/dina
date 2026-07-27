@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 249 170">
-  <!-- Generator: Adobe Illustrator 30.6.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 109)  -->
+  <!-- Generator: Adobe Illustrator 30.6.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 109) -->
   <defs>
     <style>
+      /* Default / Dark Mode color */
       .st0 {
         fill: none;
         stroke: #d0cad6;
         stroke-linecap: round;
         stroke-linejoin: round;
         stroke-width: 4px;
+      }
+
+      /* Light Mode color override */
+      @media (prefers-color-scheme: light) {
+        .st0 {
+          stroke: #13256d;
+        }
       }
     </style>
   </defs>

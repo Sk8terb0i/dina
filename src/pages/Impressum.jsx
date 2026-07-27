@@ -121,7 +121,7 @@ export default function Impressum() {
           <h2>Kontakt</h2>
           <p>
             E-Mail:{" "}
-            <a href="mailto:dina.galizzi@bluewin.ch">dina.galizzi@bluewin.ch</a>
+            <a href="mailto:kontakt@dinagalizzi.ch">kontakt@dinagalizzi.ch</a>
           </p>
         </div>
 
