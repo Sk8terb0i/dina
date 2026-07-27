@@ -5,12 +5,9 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // location.pathname enthält den Pfad OHNE den basename.
-  // Wenn du auf der Startseite bist, ist es hier also immer "/"
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Hintergrund für den sticky Header beim Scrollen einblenden
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -19,11 +16,9 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Helfer-Funktion: Verhindert den Vite/GitHub Pages Reload-Bug
   const fixTrailingSlash = () => {
     setTimeout(() => {
       const currentBrowserPath = window.location.pathname;
-      // Falls der Pfad in der URL exakt auf "dina" endet (ohne Slash), fügen wir ihn lautlos hinzu
       if (currentBrowserPath.endsWith("dina")) {
         window.history.replaceState(null, "", currentBrowserPath + "/");
       }
@@ -44,13 +39,11 @@ export default function Header() {
     setIsMenuOpen(false);
 
     if (location.pathname === "/") {
-      // Wenn wir schon auf der Startseite sind, direkt runterscrollen
       const contactSection = document.getElementById("contact");
       if (contactSection) {
         contactSection.scrollIntoView({ behavior: "smooth" });
       }
     } else {
-      // Wenn wir auf "Über mich" sind: Zurück zur Startseite navigieren, Slash fixen und scrollen
       navigate("/");
       fixTrailingSlash();
 
@@ -59,7 +52,7 @@ export default function Header() {
         if (contactSection) {
           contactSection.scrollIntoView({ behavior: "smooth" });
         }
-      }, 300); // Kurze Pause, damit die Startseite in Ruhe laden kann
+      }, 300);
     }
   };
 
@@ -68,10 +61,12 @@ export default function Header() {
       <style>
         {`
           .site-header {
-            position: fixed; /* Header bleibt beim Scrollen oben */
+            position: fixed;
             top: 0;
             left: 0;
+            right: 0;
             width: 100%;
+            box-sizing: border-box !important;
             padding: 2rem;
             display: flex;
             justify-content: space-between;
@@ -82,7 +77,6 @@ export default function Header() {
             transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
           }
 
-          /* Sanfter Hintergrund beim Herunterscrollen */
           .site-header.scrolled {
             padding: 1.2rem 2rem;
             background-color: rgba(159, 184, 163, 0.92);
@@ -113,7 +107,6 @@ export default function Header() {
             cursor: pointer;
           }
 
-          /* Animierter Unterstrich */
           .nav-link::after {
             content: '';
             position: absolute;
@@ -134,7 +127,6 @@ export default function Header() {
             transform-origin: bottom left;
           }
 
-          /* Mobile Hamburger Button */
           .hamburger-btn {
             display: none;
             background: transparent;
@@ -143,6 +135,7 @@ export default function Header() {
             padding: 0.5rem;
             color: var(--text, #13256d);
             z-index: 101;
+            flex-shrink: 0 !important;
             -webkit-tap-highlight-color: transparent;
           }
 
@@ -150,21 +143,23 @@ export default function Header() {
             display: none;
           }
 
-          /* Mobile Responsive Anpassungen */
+          /* Mobile Responsive Fixes */
           @media (max-width: 768px) {
             .site-header {
-              padding: 1.25rem 1rem !important;
+              padding: 1rem 1rem !important;
             }
 
             .site-header.scrolled {
-              padding: 1rem !important;
+              padding: 0.85rem 1rem !important;
             }
 
             .brand-link {
-              font-size: clamp(0.72rem, 3.8vw, 0.95rem) !important;
+              font-size: clamp(0.68rem, 3.3vw, 0.9rem) !important;
               font-weight: 400 !important; 
               white-space: nowrap !important; 
-              max-width: none !important;
+              overflow: hidden !important;
+              text-overflow: ellipsis !important;
+              margin-right: 0.5rem !important;
             }
 
             .nav-menu {
@@ -177,18 +172,19 @@ export default function Header() {
               justify-content: center;
             }
 
-            /* Mobile Dropdown Menü */
             .mobile-menu-drawer {
               display: flex !important;
               flex-direction: column;
               position: absolute;
               top: 100%;
               left: 0;
+              right: 0;
               width: 100%;
+              box-sizing: border-box !important;
               background-color: rgba(159, 184, 163, 0.95);
               backdrop-filter: blur(12px);
               -webkit-backdrop-filter: blur(12px);
-              padding: 1.5rem 2rem 2rem 2rem;
+              padding: 1.5rem 1.5rem 2rem 1.5rem;
               gap: 1.25rem;
               box-shadow: 0 10px 25px rgba(19, 37, 109, 0.08);
               opacity: 0;
@@ -213,7 +209,7 @@ export default function Header() {
         `}
       </style>
 
-      {/* Brand Title / Zurück zur Startseite */}
+      {/* Brand Title */}
       <a href="/" onClick={handleHomeClick} className="nav-link brand-link">
         Dina Galizzi Psychosoziale Beratung
       </a>
