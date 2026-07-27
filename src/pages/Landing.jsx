@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 export default function Landing() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [contactMode, setContactMode] = useState("email"); // "email" | "phone"
+  const [contactMode, setContactMode] = useState("email");
 
   // ========================================================
   // EASY POSITION & STYLE ADJUSTMENTS
@@ -28,30 +28,29 @@ export default function Landing() {
 
   // ========================================================
   // MOBILE ADJUSTMENTS (Screens <= 768px)
-  // Edit these values to adjust mobile hero sizes & gaps!
   // ========================================================
-  const MOBILE_HEADER_TOP_PADDING = "25vh"; // Distance from top of screen to Waterlily Icon
+  const MOBILE_HEADER_TOP_PADDING = "25vh";
 
   // *** DIRECT WATERLILY SCALE & POSITION CONTROLS ***
-  const MOBILE_HERO_LILY_WIDTH = "140vw"; // Width scale of waterlily
-  const MOBILE_HERO_LILY_HEIGHT = "140px"; // Height slot reserved for waterlily container
-  const MOBILE_HERO_LILY_X_OFFSET = "30px"; // Horizontal shift (e.g. "-20px", "15px", "3vw")
+  const MOBILE_HERO_LILY_WIDTH = "140vw";
+  const MOBILE_HERO_LILY_HEIGHT = "140px";
+  const MOBILE_HERO_LILY_X_OFFSET = "30px";
 
   // *** MOBILE FLIP TIMING CONTROLS ***
-  const MOBILE_SCROLL_FLIP_THRESHOLD = 2; // Trigger threshold in px
-  const MOBILE_LILY_FLIP_SPEED = "0.3s"; // Opacity fade speed on mobile (faster = opens in view)
+  const MOBILE_SCROLL_FLIP_THRESHOLD = 2;
+  const MOBILE_LILY_FLIP_SPEED = "0.25s";
 
-  const MOBILE_TOP_WAVE_HEIGHT = "55px"; // Height of top wavy text container
-  const MOBILE_BOTTOM_WAVE_HEIGHT = "110px"; // Height of bottom wavy text container
+  const MOBILE_TOP_WAVE_HEIGHT = "55px";
+  const MOBILE_BOTTOM_WAVE_HEIGHT = "110px";
 
-  const MOBILE_TOP_WAVE_FONT_SIZE = "38px"; // Font size for top wavy text
-  const MOBILE_BOTTOM_WAVE_FONT_SIZE = "38px"; // Font size for bottom 2-line wavy text
-  const MOBILE_WAVE_LETTER_SPACING = "1.5px"; // Letter spacing for wavy text
+  const MOBILE_TOP_WAVE_FONT_SIZE = "38px";
+  const MOBILE_BOTTOM_WAVE_FONT_SIZE = "38px";
+  const MOBILE_WAVE_LETTER_SPACING = "1.5px";
 
   // *** MOBILE STACK GAP CONTROLS (Waterlily is FIRST on mobile) ***
-  const MOBILE_LILY_TO_TOP_TEXT_GAP = "5px"; // 1. Gap: Waterlily -> Top Wavy Text ("Du bist...")
-  const MOBILE_TOP_TO_BOTTOM_TEXT_GAP = "-15px"; // 2. Gap: Top Wavy Text -> Bottom English Quote
-  const MOBILE_TIMELINE_TOP_GAP = "2rem"; // 3. Gap: Bottom English Quote -> First Timeline Item
+  const MOBILE_LILY_TO_TOP_TEXT_GAP = "5px";
+  const MOBILE_TOP_TO_BOTTOM_TEXT_GAP = "-15px";
+  const MOBILE_TIMELINE_TOP_GAP = "2rem";
 
   // MOBILE CONTACT CARD SIZES
   const MOBILE_CONTACT_CARD_WIDTH = "88%";
@@ -66,17 +65,15 @@ export default function Landing() {
 
   const targetScrollY = useRef(0);
   const isAnimatingScroll = useRef(false);
+  const touchStartY = useRef(0);
 
   useEffect(() => {
     targetScrollY.current = window.scrollY;
 
-    // Master function to evaluate the exact scroll state instantly
     const updateScrollState = () => {
       const isMobile = window.innerWidth <= 768;
       const threshold = isMobile ? MOBILE_SCROLL_FLIP_THRESHOLD : 20;
 
-      // On desktop, check the targeted scroll destination for instant snappiness.
-      // On mobile, rely directly on the exact physical window scroll position.
       const currentY = isMobile
         ? window.scrollY
         : isAnimatingScroll.current
@@ -103,9 +100,23 @@ export default function Landing() {
       updateScrollState();
     };
 
-    // Mobile specific: Bypasses throttled scroll events in Opera/Safari by evaluating during swipe gesture
-    const handleTouchMove = () => {
-      updateScrollState();
+    const handleTouchStart = (e) => {
+      if (window.innerWidth <= 768 && e.touches.length > 0) {
+        touchStartY.current = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (window.innerWidth <= 768 && e.touches.length > 0) {
+        const currentY = e.touches[0].clientY;
+        const dragDistance = touchStartY.current - currentY;
+
+        if (dragDistance > 2) {
+          setIsScrolled(true);
+        } else if (dragDistance < -5 || window.scrollY <= 2) {
+          setIsScrolled(false);
+        }
+      }
     };
 
     const smoothScrollLoop = () => {
@@ -115,7 +126,7 @@ export default function Landing() {
       if (Math.abs(diff) < 0.5) {
         window.scrollTo(0, targetScrollY.current);
         isAnimatingScroll.current = false;
-        updateScrollState(); // Ensure final exact state sync
+        updateScrollState();
         return;
       }
 
@@ -139,7 +150,6 @@ export default function Landing() {
         ),
       );
 
-      // Evaluate the state instantly the moment the user flicks the wheel up or down
       updateScrollState();
 
       if (!isAnimatingScroll.current) {
@@ -149,14 +159,15 @@ export default function Landing() {
     };
 
     window.addEventListener("scroll", handleNativeScroll, { passive: true });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("wheel", handleWheel, { passive: false });
 
-    // Initial load evaluation
     updateScrollState();
 
     return () => {
       window.removeEventListener("scroll", handleNativeScroll);
+      window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("wheel", handleWheel);
     };
@@ -182,6 +193,133 @@ export default function Landing() {
       "Einfühlsame psychosoziale Beratung für persönliche Entwicklung, Veränderung und persönliches Wachstum. Vereinbare dein Erstgespräch.",
     canonicalUrl: "https://[YOUR_GITHUB_USERNAME].github.io/dina/",
   };
+
+  // ========================================================
+  // DATA FOR "KOSTEN & RAHMEN" SECTION
+  // ========================================================
+  const kostenItems = [
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      ),
+      title: "Format",
+      desc: "Einzelberatung",
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      ),
+      title: "Dauer",
+      desc: "60 bis 90 Minuten pro Gespräch",
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+          <circle cx="12" cy="12" r="2"></circle>
+          <path d="M6 12h.01M18 12h.01"></path>
+        </svg>
+      ),
+      title: "Kosten",
+      desc: "CHF 100 pro Stunde",
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      ),
+      title: "Erstgespräch",
+      desc: "CHF 60",
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="19" y1="5" x2="5" y2="19"></line>
+          <circle cx="6.5" cy="6.5" r="2.5"></circle>
+          <circle cx="17.5" cy="17.5" r="2.5"></circle>
+        </svg>
+      ),
+      title: "Vergünstigungen",
+      desc: "Nach Absprache (z.B. für Studierende oder AHV-Bezüger)",
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+          <line x1="12" y1="18" x2="12.01" y2="18"></line>
+        </svg>
+      ),
+      title: "Bezahlung",
+      desc: "Direkt im Anschluss bar oder via Twint",
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+      ),
+      title: "Terminabsagen",
+      desc: "Bitte 24h im Voraus. Bei späteren Absagen werden 50% verrechnet (ausser bei Krankheit).",
+    },
+  ];
 
   const TimelineLilyPad = ({ rotation = 0, xPos = "50%", scale = 1 }) => {
     const baseSize = parseInt(TIMELINE_LILY_SIZE) || 48;
@@ -325,6 +463,46 @@ export default function Landing() {
               opacity: 1;
             }
 
+            /* KOSTEN & RAHMEN STYLED LIST */
+            .kosten-list {
+              display: flex;
+              flex-direction: column;
+              gap: 1.2rem;
+              margin-top: 1.5rem;
+            }
+            .kosten-item {
+              display: flex;
+              align-items: center;
+              justify-content: flex-end;
+              gap: 1.25rem;
+              text-align: right;
+            }
+            .kosten-item-text {
+              display: flex;
+              flex-direction: column;
+              gap: 0.15rem;
+            }
+            .kosten-item-title {
+              font-weight: 600;
+              font-size: 1.05rem;
+              color: var(--text);
+            }
+            .kosten-item-desc {
+              font-size: 0.95rem;
+              opacity: 0.85;
+              line-height: 1.4;
+            }
+            .kosten-item-icon {
+              width: 22px;
+              height: 22px;
+              flex-shrink: 0;
+              color: var(--text);
+              background: rgba(19, 37, 109, 0.06);
+              padding: 10px;
+              border-radius: 50%;
+              box-sizing: content-box !important;
+            }
+
             /* BACK TO TOP CHEVRON BUTTON */
             .back-to-top-btn {
               position: fixed;
@@ -438,7 +616,10 @@ export default function Landing() {
                 margin-top: ${MOBILE_TIMELINE_TOP_GAP} !important;
               }
 
+              /* Mobile Override to normal flex column stacking */
               .timeline-container {
+                display: flex !important;
+                flex-direction: column !important;
                 padding: 1rem 1rem 3rem 1rem !important;
               }
 
@@ -457,6 +638,7 @@ export default function Landing() {
                 justify-content: center !important;
                 align-items: center !important;
                 text-align: center !important;
+                min-height: auto !important;
               }
 
               .timeline-content {
@@ -474,6 +656,30 @@ export default function Landing() {
                 transform: rotate(var(--lily-rot, 0deg)) !important;
                 order: 1 !important;
                 margin-bottom: 1.25rem !important;
+              }
+
+              /* Mobile Kosten List Card Styles */
+              .kosten-list {
+                gap: 0.75rem;
+                margin-top: 1.5rem;
+              }
+              .kosten-item {
+                flex-direction: row-reverse;
+                justify-content: flex-end;
+                text-align: left;
+                background: rgba(208, 214, 202, 0.4);
+                padding: 1.2rem;
+                border-radius: 20px;
+                gap: 1rem;
+              }
+              .kosten-item-text {
+                align-items: flex-start;
+              }
+              .kosten-item-icon {
+                background: transparent;
+                padding: 0;
+                width: 28px;
+                height: 28px;
               }
 
               /* Narrower, Elegant Contact Form Card on Mobile */
@@ -785,10 +991,12 @@ export default function Landing() {
             position: "relative",
             maxWidth: "1000px",
             margin: "0 auto",
-            padding: "2rem 2rem 6rem 2rem",
+            padding: "0 2rem",
+            display: "grid",
+            gridTemplateRows: "repeat(4, 1fr)",
           }}
         >
-          {/* Animated SVG Curve */}
+          {/* Animated SVG Curve - FIXED RENDERING BUG & MATH */}
           <div
             className="timeline-bg-line"
             style={{
@@ -806,6 +1014,7 @@ export default function Landing() {
               height="100%"
               preserveAspectRatio="none"
               viewBox="0 0 100 1000"
+              style={{ overflow: "visible" }}
             >
               <path
                 d="M 50,0 
@@ -818,8 +1027,8 @@ export default function Landing() {
                 stroke="var(--text)"
                 strokeWidth="1.5"
                 opacity="0.4"
-                strokeDasharray="1400"
-                strokeDashoffset={isScrolled ? "0" : "1400"}
+                strokeDasharray="3000"
+                strokeDashoffset={isScrolled ? "0" : "3000"}
                 vectorEffect="non-scaling-stroke"
                 style={{
                   transition: `stroke-dashoffset ${WAVY_LINE_ANIM_SPEED} cubic-bezier(0.25, 1, 0.5, 1)`,
@@ -834,8 +1043,8 @@ export default function Landing() {
             style={{
               display: "flex",
               alignItems: "center",
-              marginBottom: "8rem",
               position: "relative",
+              minHeight: "350px",
               opacity: isScrolled ? 1 : 0,
               transform: isScrolled ? "translateY(0)" : "translateY(20px)",
               transition: `opacity ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(0)}ms, transform ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(0)}ms`,
@@ -860,9 +1069,16 @@ export default function Landing() {
                 Der Ansatz
               </h2>
               <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
-                [ Platzhalter für deinen Ansatz. Beschreibe, wie du mit
-                Klient*innen arbeitest, um Wachstum und Entwicklung in einem
-                geschützten Rahmen zu fördern. ]
+                Jeder Mensch ist einzigartig. In meiner psychosozialen Beratung
+                gehe ich ganz individuell auf deine persönlichen Bedürfnisse
+                ein. Mein Ansatz basiert auf der Individualpsychologie nach
+                Alfred Adler und betrachtet den Menschen als ganzheitliches
+                Wesen, in dem Körper, Seele und Geist untrennbar verbunden sind.
+                Gemäss dem Grundsatz von Adler möchte ich mit den Augen des
+                anderen sehen, mit den Ohren hören und mit dem Herzen fühlen.
+                Gemeinsam begeben wir uns auf eine spannende Entdeckungsreise,
+                um deine Persönlichkeit besser zu verstehen und deine Stärken
+                sinnvoll einzusetzen.
               </p>
             </div>
             <TimelineLilyPad rotation={15} xPos="58%" scale={1.08} />
@@ -875,8 +1091,8 @@ export default function Landing() {
               display: "flex",
               alignItems: "center",
               justifyContent: "flex-end",
-              marginBottom: "8rem",
               position: "relative",
+              minHeight: "350px",
               opacity: isScrolled ? 1 : 0,
               transform: isScrolled ? "translateY(0)" : "translateY(20px)",
               transition: `opacity ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(1)}ms, transform ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(1)}ms`,
@@ -902,21 +1118,25 @@ export default function Landing() {
                 Das Ziel
               </h2>
               <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
-                [ Platzhalter für das Ziel. Beschreibe die Ergebnisse, die du
-                anstrebst, und was Klient*innen in der Beratung erwarten können.
-                ]
+                Mein Ziel ist es, dir zu helfen, deine Berufung zu finden und
+                dein volles Potenzial freizusetzen. Wir arbeiten daran, deine
+                Resilienz aufzubauen, neue Stärken zu entdecken und schwierige
+                Lebenssituationen als Chance zum Wachstum zu nutzen. Du lernst,
+                destruktive Denkmuster abzulegen und durch ein erneuertes
+                Mindset zum eigenverantwortlichen Kapitän deines Lebens zu
+                werden.
               </p>
             </div>
           </div>
 
-          {/* BLOCK 3 */}
+          {/* BLOCK 3: KOSTEN & RAHMEN */}
           <div
             className="timeline-block"
             style={{
               display: "flex",
               alignItems: "center",
-              marginBottom: "8rem",
               position: "relative",
+              minHeight: "350px",
               opacity: isScrolled ? 1 : 0,
               transform: isScrolled ? "translateY(0)" : "translateY(20px)",
               transition: `opacity ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(2)}ms, transform ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(2)}ms`,
@@ -940,10 +1160,18 @@ export default function Landing() {
               >
                 Kosten & Rahmen
               </h2>
-              <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
-                [ Platzhalter für die Kosten. Transparenz bezüglich Honorar,
-                Abrechnung und organisatorischen Rahmenbedingungen. ]
-              </p>
+
+              <div className="kosten-list">
+                {kostenItems.map((item, idx) => (
+                  <div className="kosten-item" key={idx}>
+                    <div className="kosten-item-text">
+                      <span className="kosten-item-title">{item.title}</span>
+                      <span className="kosten-item-desc">{item.desc}</span>
+                    </div>
+                    <div className="kosten-item-icon">{item.icon}</div>
+                  </div>
+                ))}
+              </div>
             </div>
             <TimelineLilyPad rotation={75} xPos="58%" scale={1.0} />
           </div>
@@ -956,6 +1184,7 @@ export default function Landing() {
               alignItems: "center",
               justifyContent: "flex-end",
               position: "relative",
+              minHeight: "350px",
               opacity: isScrolled ? 1 : 0,
               transform: isScrolled ? "translateY(0)" : "translateY(20px)",
               transition: `opacity ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(3)}ms, transform ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(3)}ms`,
@@ -981,9 +1210,15 @@ export default function Landing() {
                 Die Methoden
               </h2>
               <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
-                [ Platzhalter für die Methoden. Nenne spezifische
-                Beratungsansätze und Werkzeuge, die du in deiner Praxis
-                verwendest. ]
+                In den Sitzungen wende ich bewährte tiefenpsychologische und
+                gesprächstherapeutische Methoden an. Mein Werkzeugkoffer umfasst
+                Ansätze aus der klientenzentrierten Gesprächstherapie nach Karl
+                Rogers, der Rational-Emotiven Therapie nach Albert Ellis sowie
+                der kognitiven Therapie nach A. T. Beck und William Backus.
+                Ebenso nutze ich Elemente der kognitiven Verhaltenstherapie und
+                der Logotherapie nach Victor Frankl. Ergänzend fliessen Ansätze
+                aus der systemischen Familientherapie und der Gestalttherapie in
+                meine Arbeit ein. Auf Wunsch biete ich auch Gebetsseelsorge an.
               </p>
             </div>
           </div>
@@ -996,7 +1231,7 @@ export default function Landing() {
           style={{
             padding: "4.5rem 3rem",
             maxWidth: "640px",
-            margin: "0 auto 6rem auto",
+            margin: "4rem auto 6rem auto",
             backgroundColor: "var(--primary)",
             borderRadius: "32px 24px 36px 28px",
             overflow: "hidden",

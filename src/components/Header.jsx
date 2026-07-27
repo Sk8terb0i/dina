@@ -1,15 +1,74 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // location.pathname enthält den Pfad OHNE den basename.
+  // Wenn du auf der Startseite bist, ist es hier also immer "/"
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Hintergrund für den sticky Header beim Scrollen einblenden
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Helfer-Funktion: Verhindert den Vite/GitHub Pages Reload-Bug
+  const fixTrailingSlash = () => {
+    setTimeout(() => {
+      const currentBrowserPath = window.location.pathname;
+      // Falls der Pfad in der URL exakt auf "dina" endet (ohne Slash), fügen wir ihn lautlos hinzu
+      if (currentBrowserPath.endsWith("dina")) {
+        window.history.replaceState(null, "", currentBrowserPath + "/");
+      }
+    }, 50);
+  };
+
+  const handleHomeClick = (e) => {
+    e.preventDefault();
+    setIsMenuOpen(false);
+
+    navigate("/");
+    fixTrailingSlash();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleContactClick = (e) => {
+    e.preventDefault();
+    setIsMenuOpen(false);
+
+    if (location.pathname === "/") {
+      // Wenn wir schon auf der Startseite sind, direkt runterscrollen
+      const contactSection = document.getElementById("contact");
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      // Wenn wir auf "Über mich" sind: Zurück zur Startseite navigieren, Slash fixen und scrollen
+      navigate("/");
+      fixTrailingSlash();
+
+      setTimeout(() => {
+        const contactSection = document.getElementById("contact");
+        if (contactSection) {
+          contactSection.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 300); // Kurze Pause, damit die Startseite in Ruhe laden kann
+    }
+  };
 
   return (
-    <header className="site-header">
+    <header className={`site-header ${isScrolled ? "scrolled" : ""}`}>
       <style>
         {`
           .site-header {
-            position: absolute;
+            position: fixed; /* Header bleibt beim Scrollen oben */
             top: 0;
             left: 0;
             width: 100%;
@@ -20,12 +79,23 @@ export default function Header() {
             z-index: 100;
             font-family: 'Satoshi', system-ui, sans-serif;
             color: #13256d;
+            transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+          }
+
+          /* Sanfter Hintergrund beim Herunterscrollen */
+          .site-header.scrolled {
+            padding: 1.2rem 2rem;
+            background-color: rgba(159, 184, 163, 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(19, 37, 109, 0.05);
           }
 
           .brand-link {
             font-size: 1.1rem;
             letter-spacing: 0.5px;
             white-space: nowrap;
+            cursor: pointer;
           }
 
           .nav-menu {
@@ -40,9 +110,10 @@ export default function Header() {
             position: relative;
             padding-bottom: 4px;
             -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
           }
 
-          /* Animated underline */
+          /* Animierter Unterstrich */
           .nav-link::after {
             content: '';
             position: absolute;
@@ -79,22 +150,25 @@ export default function Header() {
             display: none;
           }
 
-          /* Mobile Responsive Styles */
+          /* Mobile Responsive Anpassungen */
           @media (max-width: 768px) {
             .site-header {
               padding: 1.25rem 1rem !important;
             }
 
+            .site-header.scrolled {
+              padding: 1rem !important;
+            }
+
             .brand-link {
-              /* Scaled font size and nowrap to ensure one single line */
               font-size: clamp(0.72rem, 3.8vw, 0.95rem) !important;
-              font-weight: 400 !important; /* Reduced font weight on mobile */
-              white-space: nowrap !important; /* Prevents wrapping onto multiple lines */
+              font-weight: 400 !important; 
+              white-space: nowrap !important; 
               max-width: none !important;
             }
 
             .nav-menu {
-              display: none !important; /* Hide desktop menu */
+              display: none !important;
             }
 
             .hamburger-btn {
@@ -103,7 +177,7 @@ export default function Header() {
               justify-content: center;
             }
 
-            /* Mobile Dropdown Menu Drawer */
+            /* Mobile Dropdown Menü */
             .mobile-menu-drawer {
               display: flex !important;
               flex-direction: column;
@@ -139,17 +213,17 @@ export default function Header() {
         `}
       </style>
 
-      {/* Brand Title */}
-      <Link to="/" className="nav-link brand-link">
+      {/* Brand Title / Zurück zur Startseite */}
+      <a href="/" onClick={handleHomeClick} className="nav-link brand-link">
         Dina Galizzi Psychosoziale Beratung
-      </Link>
+      </a>
 
       {/* Desktop Navigation */}
       <nav className="nav-menu">
         <Link to="/about" className="nav-link">
           Über mich
         </Link>
-        <a href="#contact" className="nav-link">
+        <a href="#contact" onClick={handleContactClick} className="nav-link">
           Kontakt
         </a>
       </nav>
@@ -187,11 +261,7 @@ export default function Header() {
         >
           Über mich
         </Link>
-        <a
-          href="#contact"
-          className="nav-link"
-          onClick={() => setIsMenuOpen(false)}
-        >
+        <a href="#contact" className="nav-link" onClick={handleContactClick}>
           Kontakt
         </a>
       </div>
