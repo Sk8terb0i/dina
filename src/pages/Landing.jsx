@@ -7,6 +7,72 @@ export default function Landing() {
   const [contactMode, setContactMode] = useState("email");
 
   // ========================================================
+  // FORM STATE & SUBMIT HANDLER (Formspree AJAX)
+  // ========================================================
+  const [formData, setFormData] = useState({
+    name: "",
+    contactValue: "",
+    message: "",
+    _gotcha: "",
+  });
+
+  const [formStatus, setFormStatus] = useState({
+    submitting: false,
+    success: false,
+    error: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setFormStatus({ submitting: true, success: false, error: "" });
+
+    try {
+      const response = await fetch("https://formspree.io/f/meeyvnwz", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          Name: formData.name,
+          [contactMode === "email" ? "E-Mail" : "Telefonnummer"]:
+            formData.contactValue,
+          "Bevorzugte Kontaktart":
+            contactMode === "email" ? "E-Mail" : "Telefonanruf",
+          Nachricht: formData.message,
+          _gotcha: formData._gotcha,
+        }),
+      });
+
+      if (response.ok) {
+        setFormStatus({ submitting: false, success: true, error: "" });
+        setFormData({ name: "", contactValue: "", message: "", _gotcha: "" });
+      } else {
+        const data = await response.json();
+        setFormStatus({
+          submitting: false,
+          success: false,
+          error:
+            data?.errors?.[0]?.message ||
+            "Fehler beim Senden. Bitte erneut versuchen.",
+        });
+      }
+    } catch (err) {
+      setFormStatus({
+        submitting: false,
+        success: false,
+        error:
+          "Verbindungsfehler. Bitte sende eine E-Mail an kontakt@dinagalizzi.ch",
+      });
+    }
+  };
+
+  // ========================================================
   // EASY POSITION & STYLE ADJUSTMENTS
   // ========================================================
   // DESKTOP SCROLL TUNING
@@ -1182,7 +1248,7 @@ export default function Landing() {
             gridTemplateRows: "repeat(4, 1fr)",
           }}
         >
-          {/* Animated SVG Curve - FIXED RENDERING BUG & MATH */}
+          {/* Animated SVG Curve */}
           <div
             className="timeline-bg-line"
             style={{
@@ -1465,194 +1531,273 @@ export default function Landing() {
             <p
               style={{ marginBottom: "2.5rem", opacity: 0.85, lineHeight: 1.5 }}
             >
-              Sende eine Nachricht, um dein unverbindliches Erstgespräch zu
+              Sende eine unverbindliche Anfrage, um deinen Termin zu
               vereinbaren.
             </p>
 
-            <form
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "2.2rem",
-              }}
-              onSubmit={(e) => e.preventDefault()}
-            >
-              {/* Name Input */}
-              <div>
-                <input
-                  type="text"
-                  placeholder="Name"
-                  style={{
-                    width: "100%",
-                    padding: "0.6rem 0",
-                    background: "transparent",
-                    border: "none",
-                    borderBottom: "1.5px solid var(--text)",
-                    color: "var(--text)",
-                    fontSize: "1rem",
-                    outline: "none",
-                    fontFamily: "inherit",
-                  }}
-                />
-              </div>
-
-              {/* Preferred Contact Mode Options */}
+            {/* FORMSPREE FORM (WORKS IN OPERA & ALL BROWSERS) */}
+            {formStatus.success ? (
+              /* IN-PAGE SUCCESS MESSAGE (NO REDIRECT) */
               <div
+                style={{
+                  padding: "2rem",
+                  backgroundColor: "rgba(19, 37, 109, 0.08)",
+                  borderRadius: "20px",
+                  textAlign: "center",
+                }}
+              >
+                <h4
+                  style={{
+                    fontSize: "1.3rem",
+                    fontWeight: 600,
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  Vielen Dank für deine Nachricht!
+                </h4>
+                <p style={{ margin: 0, opacity: 0.85, fontSize: "1rem" }}>
+                  Ich habe deine Anfrage erhalten und werde mich so schnell wie
+                  möglich bei dir melden.
+                </p>
+              </div>
+            ) : (
+              <form
+                onSubmit={handleFormSubmit}
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "0.6rem",
+                  gap: "2.2rem",
                 }}
               >
-                <label
-                  style={{ fontSize: "0.88rem", fontWeight: 500, opacity: 0.8 }}
-                >
-                  Bevorzugte Kontaktart:
-                </label>
-                <div
-                  className="contact-toggle-group"
-                  style={{
-                    display: "inline-flex",
-                    alignSelf: "flex-start",
-                    padding: "4px",
-                    backgroundColor: "rgba(19, 37, 109, 0.07)",
-                    borderRadius: "50px",
-                    gap: "4px",
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setContactMode("email")}
+                {/* HONEYPOT SPAM TRAP (Invisible to humans, catches bots) */}
+                <input
+                  type="text"
+                  name="_gotcha"
+                  value={formData._gotcha}
+                  onChange={handleInputChange}
+                  style={{ display: "none" }}
+                  tabIndex="-1"
+                  autoComplete="off"
+                />
+
+                {/* Name Input */}
+                <div>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    placeholder="Name"
+                    value={formData.name}
+                    onChange={handleInputChange}
                     style={{
-                      padding: "0.5rem 1.4rem",
-                      borderRadius: "50px",
+                      width: "100%",
+                      padding: "0.6rem 0",
+                      background: "transparent",
                       border: "none",
-                      fontSize: "0.9rem",
-                      fontWeight: contactMode === "email" ? 600 : 400,
-                      backgroundColor:
-                        contactMode === "email" ? "var(--text)" : "transparent",
-                      color:
-                        contactMode === "email"
-                          ? "var(--background)"
-                          : "var(--text)",
-                      cursor: "pointer",
-                      transition: "all 0.25s ease",
+                      borderBottom: "1.5px solid var(--text)",
+                      color: "var(--text)",
+                      fontSize: "1rem",
+                      outline: "none",
                       fontFamily: "inherit",
                     }}
-                  >
-                    E-Mail
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setContactMode("phone")}
-                    style={{
-                      padding: "0.5rem 1.4rem",
-                      borderRadius: "50px",
-                      border: "none",
-                      fontSize: "0.9rem",
-                      fontWeight: contactMode === "phone" ? 600 : 400,
-                      backgroundColor:
-                        contactMode === "phone" ? "var(--text)" : "transparent",
-                      color:
-                        contactMode === "phone"
-                          ? "var(--background)"
-                          : "var(--text)",
-                      cursor: "pointer",
-                      transition: "all 0.25s ease",
-                      fontFamily: "inherit",
-                    }}
-                  >
-                    Telefonanruf
-                  </button>
+                  />
                 </div>
-              </div>
 
-              {/* Dynamic Email or Phone Input */}
-              <div>
-                {contactMode === "email" ? (
-                  <input
-                    type="email"
-                    placeholder="E-Mail-Adresse"
-                    style={{
-                      width: "100%",
-                      padding: "0.6rem 0",
-                      background: "transparent",
-                      border: "none",
-                      borderBottom: "1.5px solid var(--text)",
-                      color: "var(--text)",
-                      fontSize: "1rem",
-                      outline: "none",
-                      fontFamily: "inherit",
-                    }}
-                  />
-                ) : (
-                  <input
-                    type="tel"
-                    placeholder="Telefonnummer"
-                    style={{
-                      width: "100%",
-                      padding: "0.6rem 0",
-                      background: "transparent",
-                      border: "none",
-                      borderBottom: "1.5px solid var(--text)",
-                      color: "var(--text)",
-                      fontSize: "1rem",
-                      outline: "none",
-                      fontFamily: "inherit",
-                    }}
-                  />
-                )}
-              </div>
-
-              {/* Message Input */}
-              <div>
-                <textarea
-                  placeholder="Deine Nachricht"
-                  rows="3"
+                {/* Preferred Contact Mode Options */}
+                <div
                   style={{
-                    width: "100%",
-                    padding: "0.6rem 0",
-                    background: "transparent",
-                    border: "none",
-                    borderBottom: "1.5px solid var(--text)",
-                    color: "var(--text)",
-                    fontSize: "1rem",
-                    outline: "none",
-                    resize: "vertical",
-                    fontFamily: "inherit",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.6rem",
                   }}
-                ></textarea>
-              </div>
+                >
+                  <label
+                    style={{
+                      fontSize: "0.88rem",
+                      fontWeight: 500,
+                      opacity: 0.8,
+                    }}
+                  >
+                    Bevorzugte Kontaktart:
+                  </label>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                style={{
-                  marginTop: "0.8rem",
-                  padding: "0.9rem 2.4rem",
-                  background: "transparent",
-                  color: "var(--text)",
-                  border: "2px solid var(--text)",
-                  borderRadius: "50px",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  transition: "all 0.3s cubic-bezier(0.25, 1, 0.5, 1)",
-                  fontFamily: "inherit",
-                  alignSelf: "flex-start",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.background = "var(--text)";
-                  e.currentTarget.style.color = "var(--background)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.color = "var(--text)";
-                }}
-              >
-                Nachricht senden
-              </button>
-            </form>
+                  <div
+                    className="contact-toggle-group"
+                    style={{
+                      display: "inline-flex",
+                      alignSelf: "flex-start",
+                      padding: "4px",
+                      backgroundColor: "rgba(19, 37, 109, 0.07)",
+                      borderRadius: "50px",
+                      gap: "4px",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setContactMode("email")}
+                      style={{
+                        padding: "0.5rem 1.4rem",
+                        borderRadius: "50px",
+                        border: "none",
+                        fontSize: "0.9rem",
+                        fontWeight: contactMode === "email" ? 600 : 400,
+                        backgroundColor:
+                          contactMode === "email"
+                            ? "var(--text)"
+                            : "transparent",
+                        color:
+                          contactMode === "email"
+                            ? "var(--background)"
+                            : "var(--text)",
+                        cursor: "pointer",
+                        transition: "all 0.25s ease",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      E-Mail
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setContactMode("phone")}
+                      style={{
+                        padding: "0.5rem 1.4rem",
+                        borderRadius: "50px",
+                        border: "none",
+                        fontSize: "0.9rem",
+                        fontWeight: contactMode === "phone" ? 600 : 400,
+                        backgroundColor:
+                          contactMode === "phone"
+                            ? "var(--text)"
+                            : "transparent",
+                        color:
+                          contactMode === "phone"
+                            ? "var(--background)"
+                            : "var(--text)",
+                        cursor: "pointer",
+                        transition: "all 0.25s ease",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      Telefonanruf
+                    </button>
+                  </div>
+                </div>
+
+                {/* Dynamic Email or Phone Input */}
+                <div>
+                  {contactMode === "email" ? (
+                    <input
+                      type="email"
+                      name="contactValue"
+                      required
+                      placeholder="E-Mail-Adresse"
+                      value={formData.contactValue}
+                      onChange={handleInputChange}
+                      style={{
+                        width: "100%",
+                        padding: "0.6rem 0",
+                        background: "transparent",
+                        border: "none",
+                        borderBottom: "1.5px solid var(--text)",
+                        color: "var(--text)",
+                        fontSize: "1rem",
+                        outline: "none",
+                        fontFamily: "inherit",
+                      }}
+                    />
+                  ) : (
+                    <input
+                      type="tel"
+                      name="contactValue"
+                      required
+                      placeholder="Telefonnummer"
+                      value={formData.contactValue}
+                      onChange={handleInputChange}
+                      style={{
+                        width: "100%",
+                        padding: "0.6rem 0",
+                        background: "transparent",
+                        border: "none",
+                        borderBottom: "1.5px solid var(--text)",
+                        color: "var(--text)",
+                        fontSize: "1rem",
+                        outline: "none",
+                        fontFamily: "inherit",
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* Message Input */}
+                <div>
+                  <textarea
+                    name="message"
+                    required
+                    placeholder="Deine Nachricht"
+                    rows="3"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    style={{
+                      width: "100%",
+                      padding: "0.6rem 0",
+                      background: "transparent",
+                      border: "none",
+                      borderBottom: "1.5px solid var(--text)",
+                      color: "var(--text)",
+                      fontSize: "1rem",
+                      outline: "none",
+                      resize: "vertical",
+                      fontFamily: "inherit",
+                    }}
+                  ></textarea>
+                </div>
+
+                {formStatus.error && (
+                  <p
+                    style={{ color: "#d9534f", fontSize: "0.9rem", margin: 0 }}
+                  >
+                    {formStatus.error}
+                  </p>
+                )}
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={formStatus.submitting}
+                  style={{
+                    marginTop: "0.8rem",
+                    padding: "0.9rem 2.4rem",
+                    background: "transparent",
+                    color: "var(--text)",
+                    border: "2px solid var(--text)",
+                    borderRadius: "50px",
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    cursor: formStatus.submitting ? "wait" : "pointer",
+                    opacity: formStatus.submitting ? 0.6 : 1,
+                    transition: "all 0.3s cubic-bezier(0.25, 1, 0.5, 1)",
+                    fontFamily: "inherit",
+                    alignSelf: "flex-start",
+                  }}
+                  onMouseOver={(e) => {
+                    if (!formStatus.submitting) {
+                      e.currentTarget.style.background = "var(--text)";
+                      e.currentTarget.style.color = "var(--background)";
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!formStatus.submitting) {
+                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.color = "var(--text)";
+                    }
+                  }}
+                >
+                  {formStatus.submitting
+                    ? "Wird gesendet..."
+                    : "Nachricht senden"}
+                </button>
+              </form>
+            )}
           </div>
         </section>
       </div>
