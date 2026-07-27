@@ -22,8 +22,8 @@ export default function Landing() {
   const HERO_LILY_SIZE = "1000px";
   const TIMELINE_LILY_SIZE = "60px";
 
-  const TOP_WAVE_FONT_SIZE = "24px";
-  const BOTTOM_WAVE_FONT_SIZE = "24px";
+  const TOP_WAVE_FONT_SIZE = "52px";
+  const BOTTOM_WAVE_FONT_SIZE = "30px";
   const WAVE_LETTER_SPACING = "4px";
 
   // ========================================================
@@ -189,9 +189,8 @@ export default function Landing() {
 
   const seoData = {
     title: "Dina Galizzi | Psychosoziale Beratung",
-    description:
-      "Einfühlsame psychosoziale Beratung für persönliche Entwicklung, Veränderung und persönliches Wachstum. Vereinbare dein Erstgespräch.",
-    canonicalUrl: "https://[YOUR_GITHUB_USERNAME].github.io/dina/",
+    description: "Einfühlsame psychosoziale Beratung...",
+    canonicalUrl: "https://dinagalizzi.ch/",
   };
 
   // ========================================================
@@ -321,6 +320,114 @@ export default function Landing() {
     },
   ];
 
+  // ========================================================
+  // DATA FOR "DIE METHODEN" SECTION
+  // ========================================================
+  const methodenItems = [
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+        </svg>
+      ),
+      title: "Gesprächspsychotherapie",
+      desc: "Nach Carl Rogers",
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+        </svg>
+      ),
+      title: "Verhaltenstherapie (REVT)",
+      desc: "Rational-Emotiv nach Albert Ellis",
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      ),
+      title: "Logotherapie",
+      desc: "Nach Victor Frankl",
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M2 12h4l2-9 5 18 3-10h4"></path>
+        </svg>
+      ),
+      title: "Kognitive Beratung",
+      desc: "Nach A. T. Beck und William Backus",
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      ),
+      title: "Systemische & Gestalttherapie",
+      desc: "Als ergänzende Ansätze",
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
+          <line x1="16" y1="8" x2="2" y2="22"></line>
+          <line x1="17.5" y1="15" x2="9" y2="15"></line>
+        </svg>
+      ),
+      title: "Gebetsseelsorge",
+      desc: "Auf Wunsch",
+    },
+  ];
+
   const TimelineLilyPad = ({ rotation = 0, xPos = "50%", scale = 1 }) => {
     const baseSize = parseInt(TIMELINE_LILY_SIZE) || 48;
     const computedSize = `${baseSize * scale}px`;
@@ -348,7 +455,7 @@ export default function Landing() {
             d="M14.77,1.85l7.92,10.96L26.68.5s25.37,5.09,19.9,30.61S4.35,52.38.71,27.77c0,0-3.02-19.37,14.06-25.92Z"
             fill="var(--background)"
             stroke="var(--background)"
-            strokeWidth="8"
+            strokeWidth="18"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -373,6 +480,7 @@ export default function Landing() {
         "--primary": "#D0D6CA",
         "--secondary": "#D0CAD6",
         "--accent": "#e3efff",
+        "--wavy-font": "'Caveat'",
         backgroundColor: "var(--background)",
         color: "var(--text)",
         fontFamily: "'Satoshi', system-ui, sans-serif",
@@ -385,8 +493,22 @@ export default function Landing() {
         <title>{seoData.title}</title>
         <meta name="description" content={seoData.description} />
         <link rel="canonical" href={seoData.canonicalUrl} />
+
+        {/* Base Font */}
         <link
           href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap"
+          rel="stylesheet"
+        />
+
+        {/* Preload and import Google Handwritten Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Dancing+Script:wght@400..700&family=Great+Vibes&family=Pacifico&family=Sacramento&display=swap"
           rel="stylesheet"
         />
 
@@ -493,6 +615,46 @@ export default function Landing() {
               line-height: 1.4;
             }
             .kosten-item-icon {
+              width: 22px;
+              height: 22px;
+              flex-shrink: 0;
+              color: var(--text);
+              background: rgba(19, 37, 109, 0.06);
+              padding: 10px;
+              border-radius: 50%;
+              box-sizing: content-box !important;
+            }
+
+            /* METHODEN STYLED LIST */
+            .methoden-list {
+              display: flex;
+              flex-direction: column;
+              gap: 1.2rem;
+              margin-top: 1.5rem;
+            }
+            .methoden-item {
+              display: flex;
+              align-items: center;
+              justify-content: flex-start;
+              gap: 1.25rem;
+              text-align: left;
+            }
+            .methoden-item-text {
+              display: flex;
+              flex-direction: column;
+              gap: 0.15rem;
+            }
+            .methoden-item-title {
+              font-weight: 600;
+              font-size: 1.05rem;
+              color: var(--text);
+            }
+            .methoden-item-desc {
+              font-size: 0.95rem;
+              opacity: 0.85;
+              line-height: 1.4;
+            }
+            .methoden-item-icon {
               width: 22px;
               height: 22px;
               flex-shrink: 0;
@@ -682,6 +844,30 @@ export default function Landing() {
                 height: 28px;
               }
 
+              /* Mobile Methoden List Card Styles */
+              .methoden-list {
+                gap: 0.75rem;
+                margin-top: 1.5rem;
+              }
+              .methoden-item {
+                flex-direction: row;
+                justify-content: flex-start;
+                text-align: left;
+                background: rgba(208, 214, 202, 0.4);
+                padding: 1.2rem;
+                border-radius: 20px;
+                gap: 1rem;
+              }
+              .methoden-item-text {
+                align-items: flex-start;
+              }
+              .methoden-item-icon {
+                background: transparent;
+                padding: 0;
+                width: 28px;
+                height: 28px;
+              }
+
               /* Narrower, Elegant Contact Form Card on Mobile */
               .contact-card {
                 width: ${MOBILE_CONTACT_CARD_WIDTH} !important;
@@ -769,7 +955,7 @@ export default function Landing() {
             />
             <text
               fill="var(--text)"
-              fontFamily="'Satoshi', sans-serif"
+              fontFamily="var(--wavy-font)"
               fontWeight="500"
               style={{
                 fontSize: TOP_WAVE_FONT_SIZE,
@@ -909,7 +1095,7 @@ export default function Landing() {
             />
             <text
               fill="var(--text)"
-              fontFamily="'Satoshi', sans-serif"
+              fontFamily="var(--wavy-font)"
               fontWeight="500"
               style={{
                 fontSize: BOTTOM_WAVE_FONT_SIZE,
@@ -946,7 +1132,7 @@ export default function Landing() {
             />
             <text
               fill="var(--text)"
-              fontFamily="'Satoshi', sans-serif"
+              fontFamily="var(--wavy-font)"
               fontWeight="500"
             >
               <textPath
@@ -959,7 +1145,7 @@ export default function Landing() {
             </text>
             <text
               fill="var(--text)"
-              fontFamily="'Satoshi', sans-serif"
+              fontFamily="var(--wavy-font)"
               fontWeight="500"
             >
               <textPath
@@ -1024,7 +1210,7 @@ export default function Landing() {
                    C 58,750 42,750 42,875 
                    C 42,950 50,970 50,1000"
                 fill="none"
-                stroke="var(--text)"
+                stroke="var(--primary)"
                 strokeWidth="1.5"
                 opacity="0.4"
                 strokeDasharray="3000"
@@ -1123,8 +1309,8 @@ export default function Landing() {
                 Resilienz aufzubauen, neue Stärken zu entdecken und schwierige
                 Lebenssituationen als Chance zum Wachstum zu nutzen. Du lernst,
                 destruktive Denkmuster abzulegen und durch ein erneuertes
-                Mindset zum eigenverantwortlichen Kapitän deines Lebens zu
-                werden.
+                Mindset befreit und mit neuer Zuversicht deinen Lebensweg zu
+                gestalten.
               </p>
             </div>
           </div>
@@ -1176,7 +1362,7 @@ export default function Landing() {
             <TimelineLilyPad rotation={75} xPos="58%" scale={1.0} />
           </div>
 
-          {/* BLOCK 4 */}
+          {/* BLOCK 4: DIE METHODEN */}
           <div
             className="timeline-block timeline-block-reverse"
             style={{
@@ -1209,17 +1395,29 @@ export default function Landing() {
               >
                 Die Methoden
               </h2>
-              <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
+              <p
+                style={{
+                  lineHeight: 1.6,
+                  opacity: 0.9,
+                  marginBottom: "0.5rem",
+                }}
+              >
                 In den Sitzungen wende ich bewährte tiefenpsychologische und
-                gesprächstherapeutische Methoden an. Mein Werkzeugkoffer umfasst
-                Ansätze aus der klientenzentrierten Gesprächstherapie nach Karl
-                Rogers, der Rational-Emotiven Therapie nach Albert Ellis sowie
-                der kognitiven Therapie nach A. T. Beck und William Backus.
-                Ebenso nutze ich Elemente der kognitiven Verhaltenstherapie und
-                der Logotherapie nach Victor Frankl. Ergänzend fliessen Ansätze
-                aus der systemischen Familientherapie und der Gestalttherapie in
-                meine Arbeit ein. Auf Wunsch biete ich auch Gebetsseelsorge an.
+                gesprächstherapeutische Methoden an. Mein Werkzeugkoffer
+                umfasst:
               </p>
+
+              <div className="methoden-list">
+                {methodenItems.map((item, idx) => (
+                  <div className="methoden-item" key={idx}>
+                    <div className="methoden-item-icon">{item.icon}</div>
+                    <div className="methoden-item-text">
+                      <span className="methoden-item-title">{item.title}</span>
+                      <span className="methoden-item-desc">{item.desc}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>

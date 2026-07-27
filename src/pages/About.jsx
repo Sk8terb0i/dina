@@ -3,9 +3,8 @@ import { Helmet } from "react-helmet-async";
 export default function About() {
   const seoData = {
     title: "Über mich | Dina Galizzi Psychosoziale Beratung",
-    description:
-      "Erfahre mehr über meine Qualifikationen, meinen Werdegang und meine Motivation als psychosoziale Beraterin.",
-    canonicalUrl: "https://[YOUR_GITHUB_USERNAME].github.io/dina/about",
+    description: "Erfahre mehr über meine Qualifikationen...",
+    canonicalUrl: "https://dinagalizzi.ch/about",
   };
 
   // The provided Dina SVG, converted to a clean React component

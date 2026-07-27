@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sk8terb0i.github.io/dina-therapy/sitemap.xml
+Sitemap: https://dinagalizzi.ch/sitemap.xml
