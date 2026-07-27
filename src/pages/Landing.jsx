@@ -39,7 +39,7 @@ export default function Landing() {
 
   // *** MOBILE FLIP TIMING CONTROLS ***
   const MOBILE_SCROLL_FLIP_THRESHOLD = 2; // Trigger threshold in px
-  const MOBILE_LILY_FLIP_SPEED = "0.25s"; // Opacity fade speed on mobile (instant flip)
+  const MOBILE_LILY_FLIP_SPEED = "0.3s"; // Opacity fade speed on mobile (faster = opens in view)
 
   const MOBILE_TOP_WAVE_HEIGHT = "55px"; // Height of top wavy text container
   const MOBILE_BOTTOM_WAVE_HEIGHT = "110px"; // Height of bottom wavy text container
@@ -66,21 +66,24 @@ export default function Landing() {
 
   const targetScrollY = useRef(0);
   const isAnimatingScroll = useRef(false);
-  const touchStartY = useRef(0);
 
   useEffect(() => {
     targetScrollY.current = window.scrollY;
 
-    const handleNativeScroll = () => {
-      if (!isAnimatingScroll.current) {
-        targetScrollY.current = window.scrollY;
-      }
-
+    // Master function to evaluate the exact scroll state instantly
+    const updateScrollState = () => {
       const isMobile = window.innerWidth <= 768;
       const threshold = isMobile ? MOBILE_SCROLL_FLIP_THRESHOLD : 20;
 
-      // Fixes desktop reverse scroll: seamlessly toggles back when scrolling above threshold
-      if (window.scrollY > threshold) {
+      // On desktop, check the targeted scroll destination for instant snappiness.
+      // On mobile, rely directly on the exact physical window scroll position.
+      const currentY = isMobile
+        ? window.scrollY
+        : isAnimatingScroll.current
+          ? targetScrollY.current
+          : window.scrollY;
+
+      if (currentY > threshold) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -93,24 +96,16 @@ export default function Landing() {
       }
     };
 
-    // INSTANT TOUCH-DRAG DETECTION FOR MOBILE
-    const handleTouchStart = (e) => {
-      if (window.innerWidth <= 768 && e.touches.length > 0) {
-        touchStartY.current = e.touches[0].clientY;
+    const handleNativeScroll = () => {
+      if (!isAnimatingScroll.current) {
+        targetScrollY.current = window.scrollY;
       }
+      updateScrollState();
     };
 
-    const handleTouchMove = (e) => {
-      if (window.innerWidth <= 768 && e.touches.length > 0) {
-        const currentY = e.touches[0].clientY;
-        const dragDistance = touchStartY.current - currentY; // positive = dragging finger UP (scrolling down)
-
-        if (dragDistance > 2) {
-          setIsScrolled(true);
-        } else if (dragDistance < -5 || window.scrollY <= 2) {
-          setIsScrolled(false);
-        }
-      }
+    // Mobile specific: Bypasses throttled scroll events in Opera/Safari by evaluating during swipe gesture
+    const handleTouchMove = () => {
+      updateScrollState();
     };
 
     const smoothScrollLoop = () => {
@@ -120,6 +115,7 @@ export default function Landing() {
       if (Math.abs(diff) < 0.5) {
         window.scrollTo(0, targetScrollY.current);
         isAnimatingScroll.current = false;
+        updateScrollState(); // Ensure final exact state sync
         return;
       }
 
@@ -143,6 +139,9 @@ export default function Landing() {
         ),
       );
 
+      // Evaluate the state instantly the moment the user flicks the wheel up or down
+      updateScrollState();
+
       if (!isAnimatingScroll.current) {
         isAnimatingScroll.current = true;
         requestAnimationFrame(smoothScrollLoop);
@@ -150,13 +149,14 @@ export default function Landing() {
     };
 
     window.addEventListener("scroll", handleNativeScroll, { passive: true });
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("wheel", handleWheel, { passive: false });
 
+    // Initial load evaluation
+    updateScrollState();
+
     return () => {
       window.removeEventListener("scroll", handleNativeScroll);
-      window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("wheel", handleWheel);
     };
