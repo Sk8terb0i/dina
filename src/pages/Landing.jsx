@@ -1,13 +1,49 @@
 import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 
+// ========================================================
+// GLOBAL CONSTANTS
+// ========================================================
+const DESKTOP_SCROLL_MULTIPLIER = 0.4;
+const DESKTOP_SCROLL_EASING = 0.08;
+
+const TOP_TEXT_SCREEN_OFFSET = "18vh";
+const TOP_TEXT_TO_LILY_GAP = "150px";
+const LILY_TO_BOTTOM_TEXT_GAP = "30px";
+const TIMELINE_TOP_GAP = "6rem";
+
+const HERO_LILY_SIZE = "1000px";
+const TIMELINE_LILY_SIZE = "60px";
+
+const MOBILE_HEADER_TOP_PADDING = "18vh";
+const MOBILE_HERO_LILY_WIDTH = "200vw";
+const MOBILE_HERO_LILY_HEIGHT = "180px";
+const MOBILE_HERO_LILY_X_OFFSET = "0px";
+
+const MOBILE_SCROLL_FLIP_THRESHOLD = 2;
+const MOBILE_LILY_FLIP_SPEED = "0.25s";
+const MOBILE_TIMELINE_TOP_GAP = "2rem";
+
+const MOBILE_CONTACT_CARD_WIDTH = "88%";
+const MOBILE_CONTACT_CARD_MAX_WIDTH = "420px";
+const MOBILE_CONTACT_CARD_PADDING = "2.2rem 1.25rem";
+
+const WAVY_LINE_ANIM_SPEED = "3.2s";
+const SECTION_FADE_SPEED = "0.8s";
+const SECTION_STAGGER_STEP = 600;
+const HERO_TEXT_FADE_SPEED = "1.8s";
+
 export default function Landing() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [contactMode, setContactMode] = useState("email");
 
+  // Read More States
+  const [ansatzExpanded, setAnsatzExpanded] = useState(false);
+  const [zielExpanded, setZielExpanded] = useState(false);
+
   // ========================================================
-  // FORM STATE & SUBMIT HANDLER (Formspree AJAX)
+  // FORM STATE & SUBMIT HANDLER
   // ========================================================
   const [formData, setFormData] = useState({
     name: "",
@@ -72,63 +108,6 @@ export default function Landing() {
     }
   };
 
-  // ========================================================
-  // EASY POSITION & STYLE ADJUSTMENTS
-  // ========================================================
-  // DESKTOP SCROLL TUNING
-  const DESKTOP_SCROLL_MULTIPLIER = 0.4;
-  const DESKTOP_SCROLL_EASING = 0.08;
-
-  // DESKTOP SIZES & GAPS
-  const TOP_TEXT_SCREEN_OFFSET = "20vh";
-  const TOP_TEXT_TO_LILY_GAP = "60px";
-  const LILY_TO_BOTTOM_TEXT_GAP = "30px";
-  const TIMELINE_TOP_GAP = "8rem";
-
-  const HERO_LILY_SIZE = "1000px";
-  const TIMELINE_LILY_SIZE = "60px";
-
-  const TOP_WAVE_FONT_SIZE = "52px";
-  const BOTTOM_WAVE_FONT_SIZE = "30px";
-  const WAVE_LETTER_SPACING = "4px";
-
-  // ========================================================
-  // MOBILE ADJUSTMENTS (Screens <= 768px)
-  // ========================================================
-  const MOBILE_HEADER_TOP_PADDING = "25vh";
-
-  // *** DIRECT WATERLILY SCALE & POSITION CONTROLS ***
-  const MOBILE_HERO_LILY_WIDTH = "140vw";
-  const MOBILE_HERO_LILY_HEIGHT = "140px";
-  const MOBILE_HERO_LILY_X_OFFSET = "30px";
-
-  // *** MOBILE FLIP TIMING CONTROLS ***
-  const MOBILE_SCROLL_FLIP_THRESHOLD = 2;
-  const MOBILE_LILY_FLIP_SPEED = "0.25s";
-
-  const MOBILE_TOP_WAVE_HEIGHT = "55px";
-  const MOBILE_BOTTOM_WAVE_HEIGHT = "110px";
-
-  const MOBILE_TOP_WAVE_FONT_SIZE = "38px";
-  const MOBILE_BOTTOM_WAVE_FONT_SIZE = "38px";
-  const MOBILE_WAVE_LETTER_SPACING = "1.5px";
-
-  // *** MOBILE STACK GAP CONTROLS (Waterlily is FIRST on mobile) ***
-  const MOBILE_LILY_TO_TOP_TEXT_GAP = "5px";
-  const MOBILE_TOP_TO_BOTTOM_TEXT_GAP = "-15px";
-  const MOBILE_TIMELINE_TOP_GAP = "2rem";
-
-  // MOBILE CONTACT CARD SIZES
-  const MOBILE_CONTACT_CARD_WIDTH = "88%";
-  const MOBILE_CONTACT_CARD_MAX_WIDTH = "420px";
-  const MOBILE_CONTACT_CARD_PADDING = "2.2rem 1.25rem";
-
-  // ANIMATION SPEEDS & STAGGERING
-  const WAVY_LINE_ANIM_SPEED = "3.2s";
-  const SECTION_FADE_SPEED = "0.8s";
-  const SECTION_STAGGER_STEP = 600;
-  const HERO_TEXT_FADE_SPEED = "1.8s";
-
   const targetScrollY = useRef(0);
   const isAnimatingScroll = useRef(false);
   const touchStartY = useRef(0);
@@ -146,17 +125,8 @@ export default function Landing() {
           ? targetScrollY.current
           : window.scrollY;
 
-      if (currentY > threshold) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-
-      if (window.scrollY > 400) {
-        setShowBackToTop(true);
-      } else {
-        setShowBackToTop(false);
-      }
+      setIsScrolled(currentY > threshold);
+      setShowBackToTop(window.scrollY > 400);
     };
 
     const handleNativeScroll = () => {
@@ -202,7 +172,6 @@ export default function Landing() {
 
     const handleWheel = (e) => {
       if (window.innerWidth < 768) return;
-
       e.preventDefault();
 
       const maxScroll =
@@ -247,7 +216,7 @@ export default function Landing() {
     });
   };
 
-  const getBlockDelay = (index, totalBlocks = 4) => {
+  const getBlockDelay = (index, totalBlocks = 5) => {
     return isScrolled
       ? index * SECTION_STAGGER_STEP
       : (totalBlocks - 1 - index) * SECTION_STAGGER_STEP;
@@ -255,13 +224,10 @@ export default function Landing() {
 
   const seoData = {
     title: "Dina Galizzi | Psychosoziale Beratung",
-    description: "Einfühlsame psychosoziale Beratung...",
+    description: "Einfühlsame psychosoziale Beratung für neue Perspektiven.",
     canonicalUrl: "https://dinagalizzi.ch/",
   };
 
-  // ========================================================
-  // DATA FOR "KOSTEN & RAHMEN" SECTION
-  // ========================================================
   const kostenItems = [
     {
       icon: (
@@ -278,7 +244,7 @@ export default function Landing() {
         </svg>
       ),
       title: "Format",
-      desc: "Einzelberatung",
+      desc: "Einzelberatung. Beratung in deutscher und englischer Sprache möglich.",
     },
     {
       icon: (
@@ -382,13 +348,10 @@ export default function Landing() {
         </svg>
       ),
       title: "Terminabsagen",
-      desc: "Bitte 24h im Voraus. Bei späteren Absagen werden 50% verrechnet (ausser bei Krankheit).",
+      desc: "Bitte 24h im Voraus. Bei späteren Absagen oder unentschuldigtem Nichterscheinen wird ein Unkostenbeitrag von CHF 50.– verrechnet.",
     },
   ];
 
-  // ========================================================
-  // DATA FOR "DIE METHODEN" SECTION
-  // ========================================================
   const methodenItems = [
     {
       icon: (
@@ -403,8 +366,8 @@ export default function Landing() {
           <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
         </svg>
       ),
-      title: "Gesprächspsychotherapie",
-      desc: "Nach Carl Rogers",
+      title: "Individualpsychologie",
+      desc: "Nach Alfred Adler",
     },
     {
       icon: (
@@ -420,8 +383,8 @@ export default function Landing() {
           <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
         </svg>
       ),
-      title: "Verhaltenstherapie (REVT)",
-      desc: "Rational-Emotiv nach Albert Ellis",
+      title: "Gesprächs- und lösungsorientierte Beratung",
+      desc: "Fokussiert und zielgerichtet",
     },
     {
       icon: (
@@ -436,8 +399,8 @@ export default function Landing() {
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
       ),
-      title: "Logotherapie",
-      desc: "Nach Victor Frankl",
+      title: "Ressourcen- und Resilienzförderung",
+      desc: "Stärkung der inneren Widerstandskraft",
     },
     {
       icon: (
@@ -452,8 +415,8 @@ export default function Landing() {
           <path d="M2 12h4l2-9 5 18 3-10h4"></path>
         </svg>
       ),
-      title: "Kognitive Beratung",
-      desc: "Nach A. T. Beck und William Backus",
+      title: "Werteorientierte Beratung",
+      desc: "Ausrichtung an persönlichen Überzeugungen",
     },
     {
       icon: (
@@ -471,8 +434,8 @@ export default function Landing() {
           <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
       ),
-      title: "Systemische & Gestalttherapie",
-      desc: "Als ergänzende Ansätze",
+      title: "Förderung der Selbstreflexion",
+      desc: "und Selbstwirksamkeit",
     },
     {
       icon: (
@@ -494,6 +457,46 @@ export default function Landing() {
     },
   ];
 
+  // ========================================================
+  // SANFTE MODULARE SVG-LINIE FÜR JEDEN BLOCK
+  // ========================================================
+  const TimelineBgCurve = ({ reverse }) => {
+    const xMid = reverse ? 45 : 55;
+    const pathData = `M 50,0 C 50,30 ${xMid},35 ${xMid},50 C ${xMid},65 50,70 50,100`;
+
+    return (
+      <div
+        className="desktop-timeline-line"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      >
+        <svg
+          width="100%"
+          height="100%"
+          preserveAspectRatio="none"
+          viewBox="0 0 100 100"
+          style={{ overflow: "visible" }}
+        >
+          <path
+            d={pathData}
+            fill="none"
+            stroke="var(--primary)"
+            strokeWidth="1.5"
+            opacity="0.5"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      </div>
+    );
+  };
+
   const TimelineLilyPad = ({ rotation = 0, xPos = "50%", scale = 1 }) => {
     const baseSize = parseInt(TIMELINE_LILY_SIZE) || 48;
     const computedSize = `${baseSize * scale}px`;
@@ -504,7 +507,9 @@ export default function Landing() {
         style={{
           position: "absolute",
           left: xPos,
-          transform: `translateX(-50%) rotate(${rotation}deg)`,
+          top: "50%", // Verbindet das Blatt exakt mit der Mitte der Kurve
+          transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+          "--lily-rot": `${rotation}deg`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -512,26 +517,15 @@ export default function Landing() {
         }}
       >
         <svg
-          viewBox="-8 -8 64 64"
+          viewBox="0 0 48.25 46.59"
           width={computedSize}
           height={computedSize}
           style={{ overflow: "visible" }}
         >
+          {/* Das ABSOLUT REINE Seerosenblatt (nur Fill, absolut KEIN Masken-Stroke!) */}
           <path
-            d="M14.77,1.85l7.92,10.96L26.68.5s25.37,5.09,19.9,30.61S4.35,52.38.71,27.77c0,0-3.02-19.37,14.06-25.92Z"
-            fill="var(--background)"
-            stroke="var(--background)"
-            strokeWidth="18"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M14.77,1.85l7.92,10.96L26.68.5s25.37,5.09,19.9,30.61S4.35,52.38.71,27.77c0,0-3.02-19.37,14.06-25.92Z"
+            d="M17.68,4.77c1.57.66,3.18,1.56,3.45,4.57.06.7-.25,2.14-.03,2.81.88,2.76,3.83,1.24,3.31-.49-.63-2.12-1.59-2.92-1.89-3.86-.77-2.39.23-3.96,1.85-5.41C27.1-.06,33,.04,36.25,1.72c6.11,3.17,14.17,10.59,10.63,27.13-5.47,25.52-42.23,21.27-45.87-3.34,0,0-3.39-11.81,7.36-19.12,2.85-1.94,6.13-2.95,9.31-1.62Z"
             fill="var(--primary)"
-            stroke="var(--primary)"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
           />
         </svg>
       </div>
@@ -542,17 +536,18 @@ export default function Landing() {
     <main
       style={{
         "--text": "#13256d",
-        "--background": "#9FB8A3",
+        "--background-solid": "#68B2AD",
         "--primary": "#D0D6CA",
-        "--secondary": "#D0CAD6",
+        "--secondary": "#f0daf1",
         "--accent": "#e3efff",
-        "--wavy-font": "'Caveat'",
-        backgroundColor: "var(--background)",
         color: "var(--text)",
         fontFamily: "'Satoshi', system-ui, sans-serif",
         minHeight: "100vh",
         fontWeight: 400,
         position: "relative",
+        overflowX: "hidden",
+        width: "100%",
+        maxWidth: "100vw",
       }}
     >
       <Helmet>
@@ -560,21 +555,8 @@ export default function Landing() {
         <meta name="description" content={seoData.description} />
         <link rel="canonical" href={seoData.canonicalUrl} />
 
-        {/* Base Font */}
         <link
           href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap"
-          rel="stylesheet"
-        />
-
-        {/* Preload and import Google Handwritten Fonts */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Dancing+Script:wght@400..700&family=Great+Vibes&family=Pacifico&family=Sacramento&display=swap"
           rel="stylesheet"
         />
 
@@ -583,14 +565,17 @@ export default function Landing() {
             html, #root {
               margin: 0 !important;
               padding: 0 !important;
-              background-color: #9FB8A3 !important;
+              background: linear-gradient(180deg, #A1D4C6 0%, #68B2AD 50%, #3B8F92 100%) !important;
               width: 100% !important;
+              max-width: 100vw !important;
+              overflow-x: hidden !important;
             }
             body {
               margin: 0 !important;
               padding: 0 !important;
-              background-color: #9FB8A3 !important;
+              background: transparent !important;
               width: 100% !important;
+              max-width: 100vw !important;
               overflow-x: hidden !important;
               scroll-behavior: auto !important;
             }
@@ -601,58 +586,83 @@ export default function Landing() {
               width: 12px;
             }
             ::-webkit-scrollbar-track {
-              background: #9FB8A3;
+              background: #68B2AD;
             }
             ::-webkit-scrollbar-thumb {
               background: #13256d;
               border-radius: 10px;
-              border: 3px solid #9FB8A3;
+              border: 3px solid #68B2AD;
             }
             ::-webkit-scrollbar-thumb:hover {
               background: #272e6a;
             }
 
-            /* DIRECTIONAL FADE GRADIENT MASKS */
-            .top-wave-text {
-              mask-image: linear-gradient(to right, #000 0%, #000 35%, transparent 65%, transparent 100%);
-              -webkit-mask-image: linear-gradient(to right, #000 0%, #000 35%, transparent 65%, transparent 100%);
-              mask-size: 300% 100%;
-              -webkit-mask-size: 300% 100%;
-              mask-position: 0% 0%;
-              -webkit-mask-position: 0% 0%;
+            .hero-top-text {
+              font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+              font-weight: 500;
+              margin-bottom: ${TOP_TEXT_TO_LILY_GAP};
+              color: var(--text);
+              letter-spacing: -0.02em;
               opacity: 1;
-              transition: mask-position ${HERO_TEXT_FADE_SPEED} cubic-bezier(0.4, 0, 0.2, 1), 
-                          -webkit-mask-position ${HERO_TEXT_FADE_SPEED} cubic-bezier(0.4, 0, 0.2, 1), 
-                          opacity ${HERO_TEXT_FADE_SPEED} ease-in-out;
+              transform: translateY(0);
+              transition: opacity ${HERO_TEXT_FADE_SPEED} ease-in-out, transform ${HERO_TEXT_FADE_SPEED} ease-in-out;
             }
-
-            .top-wave-text.scrolled {
-              mask-position: 100% 0%;
-              -webkit-mask-position: 100% 0%;
+            .hero-top-text.scrolled {
               opacity: 0;
+              transform: translateY(-20px);
             }
 
-            .bottom-wave-text {
-              mask-image: linear-gradient(to right, #000 0%, #000 35%, transparent 65%, transparent 100%);
-              -webkit-mask-image: linear-gradient(to right, #000 0%, #000 35%, transparent 65%, transparent 100%);
-              mask-size: 300% 100%;
-              -webkit-mask-size: 300% 100%;
-              mask-position: 100% 0%;
-              -webkit-mask-position: 100% 0%;
+            .bottom-text-block {
               opacity: 0;
-              transition: mask-position ${HERO_TEXT_FADE_SPEED} cubic-bezier(0.4, 0, 0.2, 1), 
-                          -webkit-mask-position ${HERO_TEXT_FADE_SPEED} cubic-bezier(0.4, 0, 0.2, 1), 
-                          opacity ${HERO_TEXT_FADE_SPEED} ease-in-out;
+              transform: translateY(20px);
+              transition: opacity ${HERO_TEXT_FADE_SPEED} ease-in-out, transform ${HERO_TEXT_FADE_SPEED} ease-in-out;
+            }
+            .bottom-text-block.scrolled {
+              opacity: 1;
+              transform: translateY(0);
             }
 
-            .bottom-wave-text.scrolled {
-              mask-position: 0% 0%;
-              -webkit-mask-position: 0% 0%;
+            .intro-ul {
+              list-style: none;
+              padding: 0;
+              margin: 1.25rem 0;
+              font-style: italic;
+              opacity: 0.9;
+            }
+            .intro-ul li {
+              margin-bottom: 0.6rem;
+            }
+
+            /* Read More Styles */
+            .read-more-btn {
+              background: none;
+              border: none;
+              color: var(--text);
+              font-weight: 600;
+              font-size: 1rem;
+              padding: 0;
+              margin-top: 0.5rem;
+              cursor: pointer;
+              text-decoration: underline;
+              text-underline-offset: 4px;
+              text-decoration-color: var(--secondary);
+              opacity: 0.8;
+              transition: opacity 0.2s;
+              font-family: inherit;
+            }
+            .read-more-btn:hover {
               opacity: 1;
             }
+            .expanded-content {
+              animation: fadeIn 0.5s ease-out forwards;
+              margin-top: 0.8rem;
+            }
+            @keyframes fadeIn {
+              from { opacity: 0; transform: translateY(-5px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
 
-            /* KOSTEN & RAHMEN STYLED LIST */
-            .kosten-list {
+            .kosten-list, .methoden-list {
               display: flex;
               flex-direction: column;
               gap: 1.2rem;
@@ -665,39 +675,6 @@ export default function Landing() {
               gap: 1.25rem;
               text-align: right;
             }
-            .kosten-item-text {
-              display: flex;
-              flex-direction: column;
-              gap: 0.15rem;
-            }
-            .kosten-item-title {
-              font-weight: 600;
-              font-size: 1.05rem;
-              color: var(--text);
-            }
-            .kosten-item-desc {
-              font-size: 0.95rem;
-              opacity: 0.85;
-              line-height: 1.4;
-            }
-            .kosten-item-icon {
-              width: 22px;
-              height: 22px;
-              flex-shrink: 0;
-              color: var(--text);
-              background: rgba(19, 37, 109, 0.06);
-              padding: 10px;
-              border-radius: 50%;
-              box-sizing: content-box !important;
-            }
-
-            /* METHODEN STYLED LIST */
-            .methoden-list {
-              display: flex;
-              flex-direction: column;
-              gap: 1.2rem;
-              margin-top: 1.5rem;
-            }
             .methoden-item {
               display: flex;
               align-items: center;
@@ -705,22 +682,22 @@ export default function Landing() {
               gap: 1.25rem;
               text-align: left;
             }
-            .methoden-item-text {
+            .kosten-item-text, .methoden-item-text {
               display: flex;
               flex-direction: column;
               gap: 0.15rem;
             }
-            .methoden-item-title {
+            .kosten-item-title, .methoden-item-title {
               font-weight: 600;
               font-size: 1.05rem;
               color: var(--text);
             }
-            .methoden-item-desc {
+            .kosten-item-desc, .methoden-item-desc {
               font-size: 0.95rem;
               opacity: 0.85;
               line-height: 1.4;
             }
-            .methoden-item-icon {
+            .kosten-item-icon, .methoden-item-icon {
               width: 22px;
               height: 22px;
               flex-shrink: 0;
@@ -731,7 +708,6 @@ export default function Landing() {
               box-sizing: content-box !important;
             }
 
-            /* BACK TO TOP CHEVRON BUTTON */
             .back-to-top-btn {
               position: fixed;
               bottom: 2rem;
@@ -750,23 +726,14 @@ export default function Landing() {
               transition: all 0.35s ease;
               padding: 6px;
             }
-
             .back-to-top-btn.visible {
               opacity: 0.75;
               transform: translateY(0);
               pointer-events: auto;
             }
-
             .back-to-top-btn:hover {
               opacity: 1;
               transform: translateY(-4px);
-            }
-
-            .desktop-bottom-wave {
-              display: block;
-            }
-            .mobile-bottom-wave {
-              display: none;
             }
 
             ::placeholder {
@@ -774,90 +741,54 @@ export default function Landing() {
               opacity: 0.55 !important;
             }
 
-            /* ======================================================== */
-            /* MOBILE RESPONSIVE ADAPTATIONS (<= 768px)                */
-            /* ======================================================== */
             @media (max-width: 768px) {
+              .hero-top-text {
+                margin-bottom: 1.5rem !important; /* Verhindert den Desktop-Abstand auf dem Handy */
+              }  
+            
               .header-section {
                 padding-top: ${MOBILE_HEADER_TOP_PADDING} !important;
-                padding-left: 0.5rem !important;
-                padding-right: 0.5rem !important;
+                padding-left: 1.25rem !important;
+                padding-right: 1.25rem !important;
+                overflow: hidden !important; 
               }
 
-              /* 1. MOBILE REORDERING: Waterlily Container is FIRST */
               .hero-lily-container {
-                order: 1 !important;
+                width: 100% !important;
                 height: ${MOBILE_HERO_LILY_HEIGHT} !important;
-                margin-bottom: ${MOBILE_LILY_TO_TOP_TEXT_GAP} !important;
+                margin: 1.5rem 0 !important;
                 overflow: visible !important;
                 display: flex !important;
                 justify-content: center !important;
                 align-items: center !important;
-                transform: translateX(${MOBILE_HERO_LILY_X_OFFSET}) !important;
               }
-
-              /* Scales the Waterlily SVG directly on mobile */
               .hero-lily-container svg {
-                width: ${MOBILE_HERO_LILY_WIDTH} !important;
+                width: ${MOBILE_HERO_LILY_WIDTH} !important; 
                 max-width: none !important;
-                flex-shrink: 0 !important;
+                height: auto !important;
               }
-
-              /* Instant opacity transition on mobile so the lily opens right in front of user */
               .hero-lily-container > div {
                 transition: opacity ${MOBILE_LILY_FLIP_SPEED} ease-in-out !important;
               }
 
-              /* 2. Top Wavy Text ("Du bist...") is SECOND */
-              .top-wave-container {
-                order: 2 !important;
-                height: ${MOBILE_TOP_WAVE_HEIGHT} !important;
-                margin-bottom: ${MOBILE_TOP_TO_BOTTOM_TEXT_GAP} !important;
+              .bottom-text-block {
+                margin-top: 1rem !important;
+                padding: 0 0.5rem;
               }
 
-              /* 3. Bottom Wavy Text (English Quote) is THIRD */
-              .bottom-wave-container {
-                order: 3 !important;
-                height: ${MOBILE_BOTTOM_WAVE_HEIGHT} !important;
-                margin-top: 0px !important;
-              }
-
-              .top-wave-text text {
-                font-size: ${MOBILE_TOP_WAVE_FONT_SIZE} !important;
-                letter-spacing: ${MOBILE_WAVE_LETTER_SPACING} !important;
-              }
-
-              .bottom-wave-text text {
-                font-size: ${MOBILE_BOTTOM_WAVE_FONT_SIZE} !important;
-                letter-spacing: ${MOBILE_WAVE_LETTER_SPACING} !important;
-              }
-
-              .desktop-bottom-wave {
-                display: none !important;
-              }
-              .mobile-bottom-wave {
-                display: block !important;
-              }
-
-              /* 4. Distance to First Timeline Item */
               .timeline-wrapper {
                 margin-top: ${MOBILE_TIMELINE_TOP_GAP} !important;
               }
-
-              /* Mobile Override to normal flex column stacking */
               .timeline-container {
                 display: flex !important;
                 flex-direction: column !important;
-                padding: 1rem 1rem 3rem 1rem !important;
+                padding: 1rem 1.25rem 3rem 1.25rem !important;
               }
-
-              .timeline-bg-line {
+              .desktop-timeline-line {
                 display: none !important;
               }
 
-              /* Show timeline blocks immediately on mobile */
-              .timeline-block,
-              .timeline-block-reverse {
+              .timeline-block, .timeline-block-reverse {
                 opacity: 1 !important;
                 transform: translateY(0) !important;
                 transition: none !important;
@@ -867,55 +798,31 @@ export default function Landing() {
                 align-items: center !important;
                 text-align: center !important;
                 min-height: auto !important;
+                padding: 0 !important;
               }
-
+              
+              /* STRIKTE REIHENFOLGE: Seerose (Order 1), Text (Order 2) */
               .timeline-content {
                 width: 100% !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
+                padding: 0 !important;
                 text-align: center !important;
                 margin-bottom: 0 !important;
-                order: 2 !important;
+                order: 2 !important; 
               }
-
               .timeline-lily-wrapper {
                 position: relative !important;
                 left: auto !important;
+                top: auto !important;
                 transform: rotate(var(--lily-rot, 0deg)) !important;
+                margin-bottom: 1.5rem !important;
                 order: 1 !important;
-                margin-bottom: 1.25rem !important;
               }
 
-              /* Mobile Kosten List Card Styles */
-              .kosten-list {
+              .kosten-list, .methoden-list {
                 gap: 0.75rem;
                 margin-top: 1.5rem;
               }
-              .kosten-item {
-                flex-direction: row-reverse;
-                justify-content: flex-end;
-                text-align: left;
-                background: rgba(208, 214, 202, 0.4);
-                padding: 1.2rem;
-                border-radius: 20px;
-                gap: 1rem;
-              }
-              .kosten-item-text {
-                align-items: flex-start;
-              }
-              .kosten-item-icon {
-                background: transparent;
-                padding: 0;
-                width: 28px;
-                height: 28px;
-              }
-
-              /* Mobile Methoden List Card Styles */
-              .methoden-list {
-                gap: 0.75rem;
-                margin-top: 1.5rem;
-              }
-              .methoden-item {
+              .kosten-item, .methoden-item {
                 flex-direction: row;
                 justify-content: flex-start;
                 text-align: left;
@@ -924,54 +831,41 @@ export default function Landing() {
                 border-radius: 20px;
                 gap: 1rem;
               }
-              .methoden-item-text {
+              .kosten-item {
+                flex-direction: row-reverse;
+                justify-content: flex-end;
+              }
+              .kosten-item-text, .methoden-item-text {
                 align-items: flex-start;
               }
-              .methoden-item-icon {
+              .kosten-item-icon, .methoden-item-icon {
                 background: transparent;
                 padding: 0;
                 width: 28px;
                 height: 28px;
               }
 
-              /* Narrower, Elegant Contact Form Card on Mobile */
               .contact-card {
-                width: ${MOBILE_CONTACT_CARD_WIDTH} !important;
-                max-width: ${MOBILE_CONTACT_CARD_MAX_WIDTH} !important;
+                width: 100% !important;
                 padding: ${MOBILE_CONTACT_CARD_PADDING} !important;
                 margin: 0 auto 3.5rem auto !important;
                 border-radius: 24px !important;
               }
-
               .contact-card h3 {
                 font-size: 1.15rem !important;
                 margin-bottom: 1.8rem !important;
-                line-height: 1.4 !important;
               }
-
               .contact-card h2 {
                 font-size: 1.25rem !important;
               }
-
-              .contact-card p {
-                font-size: 0.9rem !important;
-                margin-bottom: 1.5rem !important;
-              }
-
               .contact-card form {
                 gap: 1.4rem !important;
               }
-
-              .contact-toggle-group {
-                width: 100%;
-              }
-
               .contact-toggle-group button {
                 flex: 1;
                 padding: 0.45rem 0.8rem !important;
                 font-size: 0.85rem !important;
               }
-
               .back-to-top-btn {
                 bottom: 1.25rem;
                 right: 1.25rem;
@@ -997,49 +891,11 @@ export default function Landing() {
           textAlign: "center",
         }}
       >
-        {/* Top Wave Text */}
-        <div
-          className={`top-wave-text top-wave-container ${isScrolled ? "scrolled" : ""}`}
-          style={{
-            position: "relative",
-            width: "100%",
-            maxWidth: "800px",
-            height: "100px",
-            marginBottom: TOP_TEXT_TO_LILY_GAP,
-            zIndex: 10,
-          }}
-        >
-          <svg
-            viewBox="0 0 1000 120"
-            width="100%"
-            style={{ position: "absolute", top: 0, left: 0 }}
-          >
-            <path
-              id="wavyPathTop"
-              d="M 0,80 Q 250,20 500,80 T 1000,80"
-              fill="transparent"
-            />
-            <text
-              fill="var(--text)"
-              fontFamily="var(--wavy-font)"
-              fontWeight="500"
-              style={{
-                fontSize: TOP_WAVE_FONT_SIZE,
-                letterSpacing: WAVE_LETTER_SPACING,
-              }}
-            >
-              <textPath
-                href="#wavyPathTop"
-                startOffset="50%"
-                textAnchor="middle"
-              >
-                Du bist was du denkst.
-              </textPath>
-            </text>
-          </svg>
-        </div>
+        {/* Klarer Text ohne Handschrift, immer oben! */}
+        <h1 className={`hero-top-text ${isScrolled ? "scrolled" : ""}`}>
+          «Dein Weg zu mehr Klarheit und innerer Stärke»
+        </h1>
 
-        {/* Central Waterlily */}
         <div
           className="hero-lily-container"
           style={{
@@ -1135,99 +991,48 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Bottom Wave Text */}
         <div
-          className={`bottom-wave-text bottom-wave-container ${isScrolled ? "scrolled" : ""}`}
+          className={`bottom-text-block ${isScrolled ? "scrolled" : ""}`}
           style={{
-            position: "relative",
             width: "100%",
-            maxWidth: "800px",
-            height: "120px",
+            maxWidth: "700px",
             marginTop: LILY_TO_BOTTOM_TEXT_GAP,
             zIndex: 10,
+            fontSize: "1.1rem",
+            lineHeight: 1.6,
           }}
         >
-          {/* DESKTOP SINGLE-LINE WAVE SVG */}
-          <svg
-            className="desktop-bottom-wave"
-            viewBox="0 0 1000 200"
-            width="100%"
-            style={{ position: "absolute", top: 0, left: 0 }}
+          <p
+            style={{
+              fontWeight: 500,
+              marginBottom: "1.5rem",
+              fontSize: "1.2rem",
+            }}
           >
-            <path
-              id="wavyPathBottomDesktop"
-              d="M 0,100 Q 250,160 500,100 T 1000,100"
-              fill="transparent"
-            />
-            <text
-              fill="var(--text)"
-              fontFamily="var(--wavy-font)"
-              fontWeight="500"
-              style={{
-                fontSize: BOTTOM_WAVE_FONT_SIZE,
-                letterSpacing: WAVE_LETTER_SPACING,
-              }}
-            >
-              <textPath
-                href="#wavyPathBottomDesktop"
-                startOffset="50%"
-                textAnchor="middle"
-              >
-                Anyone can find the dirt in someone. Be the one that finds the
-                gold.
-              </textPath>
-            </text>
-          </svg>
-
-          {/* MOBILE 2-LINE STACKED WAVE SVG */}
-          <svg
-            className="mobile-bottom-wave"
-            viewBox="0 0 1000 220"
-            width="100%"
-            style={{ position: "absolute", top: 0, left: 0 }}
-          >
-            <path
-              id="wavyPathBottomMobile1"
-              d="M 0,60 Q 250,110 500,60 T 1000,60"
-              fill="transparent"
-            />
-            <path
-              id="wavyPathBottomMobile2"
-              d="M 0,150 Q 250,200 500,150 T 1000,150"
-              fill="transparent"
-            />
-            <text
-              fill="var(--text)"
-              fontFamily="var(--wavy-font)"
-              fontWeight="500"
-            >
-              <textPath
-                href="#wavyPathBottomMobile1"
-                startOffset="50%"
-                textAnchor="middle"
-              >
-                Anyone can find the dirt in someone.
-              </textPath>
-            </text>
-            <text
-              fill="var(--text)"
-              fontFamily="var(--wavy-font)"
-              fontWeight="500"
-            >
-              <textPath
-                href="#wavyPathBottomMobile2"
-                startOffset="50%"
-                textAnchor="middle"
-              >
-                Be the one that finds the gold.
-              </textPath>
-            </text>
-          </svg>
+            Schön, dass du den Weg hierher gefunden hast.
+          </p>
+          <p style={{ margin: 0 }}>«Du bist hier richtig, wenn du…</p>
+          <ul className="intro-ul">
+            <li>
+              …in einer schwierigen Lebenssituation steckst und Neuorientierung
+              suchst.
+            </li>
+            <li>…dich von destruktiven Denkmustern befreien möchtest.</li>
+            <li>
+              …deine eigene Berufung und deine Stärken (wieder)finden willst.»
+            </li>
+          </ul>
+          <p style={{ opacity: 0.9 }}>
+            Sich Unterstützung zu holen, ist der erste Schritt auf dem Weg zur
+            Veränderung. In meiner psychosozialen Beratung begleite ich dich
+            dabei, alte Denkmuster aufzubrechen und dein volles Potenzial zu
+            entfalten.
+          </p>
         </div>
       </section>
 
       {/* ======================================================== */}
-      {/* GLIDING CONTENT WRAPPER                                  */}
+      {/* TIMELINE SECTION                                         */}
       {/* ======================================================== */}
       <div
         className="timeline-wrapper"
@@ -1245,63 +1050,23 @@ export default function Landing() {
             margin: "0 auto",
             padding: "0 2rem",
             display: "grid",
-            gridTemplateRows: "repeat(4, 1fr)",
+            gridTemplateRows: "repeat(5, auto)",
+            gap: 0,
           }}
         >
-          {/* Animated SVG Curve */}
-          <div
-            className="timeline-bg-line"
-            style={{
-              position: "absolute",
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-              zIndex: 0,
-              pointerEvents: "none",
-            }}
-          >
-            <svg
-              width="100%"
-              height="100%"
-              preserveAspectRatio="none"
-              viewBox="0 0 100 1000"
-              style={{ overflow: "visible" }}
-            >
-              <path
-                d="M 50,0 
-                   C 50,62.5 58,62.5 58,125 
-                   C 58,250 42,250 42,375 
-                   C 42,500 58,500 58,625 
-                   C 58,750 42,750 42,875 
-                   C 42,950 50,970 50,1000"
-                fill="none"
-                stroke="var(--primary)"
-                strokeWidth="1.5"
-                opacity="0.4"
-                strokeDasharray="3000"
-                strokeDashoffset={isScrolled ? "0" : "3000"}
-                vectorEffect="non-scaling-stroke"
-                style={{
-                  transition: `stroke-dashoffset ${WAVY_LINE_ANIM_SPEED} cubic-bezier(0.25, 1, 0.5, 1)`,
-                }}
-              />
-            </svg>
-          </div>
-
-          {/* BLOCK 1 */}
+          {/* BLOCK 1: Der Ansatz */}
           <div
             className="timeline-block"
             style={{
               display: "flex",
               alignItems: "center",
               position: "relative",
-              minHeight: "350px",
               opacity: isScrolled ? 1 : 0,
               transform: isScrolled ? "translateY(0)" : "translateY(20px)",
               transition: `opacity ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(0)}ms, transform ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(0)}ms`,
             }}
           >
+            <TimelineBgCurve reverse={false} />
             <div
               className="timeline-content"
               style={{
@@ -1309,6 +1074,7 @@ export default function Landing() {
                 paddingRight: "3rem",
                 textAlign: "right",
                 zIndex: 3,
+                padding: "3rem 0",
               }}
             >
               <h2
@@ -1321,22 +1087,75 @@ export default function Landing() {
                 Der Ansatz
               </h2>
               <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
-                Jeder Mensch ist einzigartig. In meiner psychosozialen Beratung
-                gehe ich ganz individuell auf deine persönlichen Bedürfnisse
-                ein. Mein Ansatz basiert auf der Individualpsychologie nach
-                Alfred Adler und betrachtet den Menschen als ganzheitliches
-                Wesen, in dem Körper, Seele und Geist untrennbar verbunden sind.
-                Gemäss dem Grundsatz von Adler möchte ich mit den Augen des
-                anderen sehen, mit den Ohren hören und mit dem Herzen fühlen.
-                Gemeinsam begeben wir uns auf eine spannende Entdeckungsreise,
-                um deine Persönlichkeit besser zu verstehen und deine Stärken
-                sinnvoll einzusetzen.
+                In meiner Beratung gehe ich ganz individuell auf deine
+                persönlichen Bedürfnisse ein. Sie basiert auf der
+                Individualpsychologie nach Alfred Adler und betrachtet den
+                Menschen als ganzheitliches Wesen, in dem Körper, Seele und
+                Geist untrennbar miteinander verbunden sind. Der Mensch ist als
+                Gemeinschaftswesen geschaffen, dessen Denken, Fühlen und Handeln
+                stets zielgerichtet ist.
               </p>
+
+              {!ansatzExpanded && (
+                <button
+                  onClick={() => setAnsatzExpanded(true)}
+                  className="read-more-btn"
+                >
+                  Mehr lesen...
+                </button>
+              )}
+
+              {ansatzExpanded && (
+                <div className="expanded-content">
+                  <p
+                    style={{
+                      lineHeight: 1.6,
+                      opacity: 0.9,
+                      marginBottom: "0.8rem",
+                    }}
+                  >
+                    Mein christliches Menschenbild prägt dabei meine Haltung in
+                    der Beratung. Ich bin überzeugt, dass jeder Mensch
+                    einzigartig, von Gott gewollt, wertvoll und mit einer
+                    unverwechselbaren Würde sowie einem persönlichen Potenzial
+                    ausgestattet ist. Diese Grundhaltung fliesst in meine
+                    Beratung ein – unabhängig davon, ob jemand den christlichen
+                    Glauben teilt oder nicht.
+                  </p>
+                  <p
+                    style={{
+                      lineHeight: 1.6,
+                      opacity: 0.9,
+                      marginBottom: "0.8rem",
+                    }}
+                  >
+                    Gemäss einem Grundsatz von Alfred Adler möchte ich «mit den
+                    Augen des anderen sehen, mit den Ohren des anderen hören und
+                    mit dem Herzen des anderen fühlen.» Diese wertschätzende
+                    Haltung bildet die Grundlage meiner Arbeit.
+                  </p>
+                  <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
+                    In einer vertrauensvollen und geschützten Atmosphäre begeben
+                    wir uns gemeinsam auf eine Entdeckungsreise. Dabei lernst du
+                    deine Persönlichkeit besser zu verstehen, entdeckst deine
+                    Ressourcen und entwickelst neue Perspektiven. Gemeinsam
+                    arbeiten wir daran, deine Stärken bewusst einzusetzen und
+                    deinen persönlichen Weg mit mehr Klarheit, Selbstvertrauen
+                    und Zuversicht zu gestalten.
+                  </p>
+                  <button
+                    onClick={() => setAnsatzExpanded(false)}
+                    className="read-more-btn"
+                  >
+                    Weniger anzeigen
+                  </button>
+                </div>
+              )}
             </div>
-            <TimelineLilyPad rotation={15} xPos="58%" scale={1.08} />
+            <TimelineLilyPad rotation={15} xPos="55%" scale={1.08} />
           </div>
 
-          {/* BLOCK 2 */}
+          {/* BLOCK 2: Das Ziel */}
           <div
             className="timeline-block timeline-block-reverse"
             style={{
@@ -1344,13 +1163,13 @@ export default function Landing() {
               alignItems: "center",
               justifyContent: "flex-end",
               position: "relative",
-              minHeight: "350px",
               opacity: isScrolled ? 1 : 0,
               transform: isScrolled ? "translateY(0)" : "translateY(20px)",
               transition: `opacity ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(1)}ms, transform ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(1)}ms`,
             }}
           >
-            <TimelineLilyPad rotation={-45} xPos="42%" scale={0.88} />
+            <TimelineBgCurve reverse={true} />
+            <TimelineLilyPad rotation={-45} xPos="45%" scale={0.88} />
             <div
               className="timeline-content"
               style={{
@@ -1358,6 +1177,7 @@ export default function Landing() {
                 paddingLeft: "3rem",
                 textAlign: "left",
                 zIndex: 3,
+                padding: "3rem 0",
               }}
             >
               <h2
@@ -1370,14 +1190,62 @@ export default function Landing() {
                 Das Ziel
               </h2>
               <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
-                Mein Ziel ist es, dir zu helfen, deine Berufung zu finden und
-                dein volles Potenzial freizusetzen. Wir arbeiten daran, deine
-                Resilienz aufzubauen, neue Stärken zu entdecken und schwierige
-                Lebenssituationen als Chance zum Wachstum zu nutzen. Du lernst,
-                destruktive Denkmuster abzulegen und durch ein erneuertes
-                Mindset befreit und mit neuer Zuversicht deinen Lebensweg zu
-                gestalten.
+                Ich arbeite stärken-, ressourcen- und lösungsorientiert. Mein
+                Ziel ist es, dich dabei zu unterstützen, dein persönliches
+                Potenzial zu entfalten und deinen eigenen Weg bewusst und
+                authentisch zu leben.
               </p>
+
+              {!zielExpanded && (
+                <button
+                  onClick={() => setZielExpanded(true)}
+                  className="read-more-btn"
+                >
+                  Mehr lesen...
+                </button>
+              )}
+
+              {zielExpanded && (
+                <div className="expanded-content">
+                  <p
+                    style={{
+                      lineHeight: 1.6,
+                      opacity: 0.9,
+                      marginBottom: "0.8rem",
+                    }}
+                  >
+                    Gemeinsam arbeiten wir daran, deine Resilienz zu stärken,
+                    verborgene Ressourcen zu entdecken und schwierige
+                    Lebenssituationen als Chancen für persönliches Wachstum zu
+                    nutzen.
+                  </p>
+                  <p
+                    style={{
+                      lineHeight: 1.6,
+                      opacity: 0.9,
+                      marginBottom: "0.8rem",
+                    }}
+                  >
+                    In diesem Prozess lernst du, hinderliche Denk- und
+                    Verhaltensmuster zu erkennen und Schritt für Schritt
+                    loszulassen. Gleichzeitig entwickelst du neue Sichtweisen,
+                    stärkst dein Selbstvertrauen und gewinnst innere Freiheit,
+                    neue Handlungsmöglichkeiten und Zuversicht für deinen
+                    weiteren Lebensweg.
+                  </p>
+                  <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
+                    Mein Anliegen ist es, dass du deine Fähigkeiten neu
+                    entdeckst und befähigt wirst, Herausforderungen
+                    selbstbewusst und eigenverantwortlich zu begegnen.
+                  </p>
+                  <button
+                    onClick={() => setZielExpanded(false)}
+                    className="read-more-btn"
+                  >
+                    Weniger anzeigen
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -1388,12 +1256,12 @@ export default function Landing() {
               display: "flex",
               alignItems: "center",
               position: "relative",
-              minHeight: "350px",
               opacity: isScrolled ? 1 : 0,
               transform: isScrolled ? "translateY(0)" : "translateY(20px)",
               transition: `opacity ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(2)}ms, transform ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(2)}ms`,
             }}
           >
+            <TimelineBgCurve reverse={false} />
             <div
               className="timeline-content"
               style={{
@@ -1401,6 +1269,7 @@ export default function Landing() {
                 paddingRight: "3rem",
                 textAlign: "right",
                 zIndex: 3,
+                padding: "3rem 0",
               }}
             >
               <h2
@@ -1412,7 +1281,6 @@ export default function Landing() {
               >
                 Kosten & Rahmen
               </h2>
-
               <div className="kosten-list">
                 {kostenItems.map((item, idx) => (
                   <div className="kosten-item" key={idx}>
@@ -1425,7 +1293,7 @@ export default function Landing() {
                 ))}
               </div>
             </div>
-            <TimelineLilyPad rotation={75} xPos="58%" scale={1.0} />
+            <TimelineLilyPad rotation={75} xPos="55%" scale={1.0} />
           </div>
 
           {/* BLOCK 4: DIE METHODEN */}
@@ -1436,13 +1304,13 @@ export default function Landing() {
               alignItems: "center",
               justifyContent: "flex-end",
               position: "relative",
-              minHeight: "350px",
               opacity: isScrolled ? 1 : 0,
               transform: isScrolled ? "translateY(0)" : "translateY(20px)",
               transition: `opacity ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(3)}ms, transform ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(3)}ms`,
             }}
           >
-            <TimelineLilyPad rotation={10} xPos="42%" scale={0.92} />
+            <TimelineBgCurve reverse={true} />
+            <TimelineLilyPad rotation={10} xPos="45%" scale={0.92} />
             <div
               className="timeline-content"
               style={{
@@ -1450,6 +1318,7 @@ export default function Landing() {
                 paddingLeft: "3rem",
                 textAlign: "left",
                 zIndex: 3,
+                padding: "3rem 0",
               }}
             >
               <h2
@@ -1468,9 +1337,12 @@ export default function Landing() {
                   marginBottom: "0.5rem",
                 }}
               >
-                In den Sitzungen wende ich bewährte tiefenpsychologische und
-                gesprächstherapeutische Methoden an. Mein Werkzeugkoffer
-                umfasst:
+                In meinen Beratungen verbinde ich bewährte tiefenpsychologische
+                sowie gesprächs- und ressourcenorientierte Methoden mit einer
+                wertschätzenden und ganzheitlichen Begleitung.
+                <br />
+                <br />
+                Mein methodischer Werkzeugkoffer umfasst unter anderem:
               </p>
 
               <div className="methoden-list">
@@ -1484,9 +1356,89 @@ export default function Landing() {
                   </div>
                 ))}
               </div>
+              <p style={{ lineHeight: 1.6, opacity: 0.9, marginTop: "1.5rem" }}>
+                Jeder Mensch ist einzigartig. Deshalb passe ich die Methoden
+                individuell an deine persönliche Situation, deine Ziele und
+                deine Bedürfnisse an.
+                <br />
+                <br />
+                Ich bin Christin, und mein Glaube prägt mein Menschenbild sowie
+                meine Werte. Wenn du dies wünschst, kann das Gebet als
+                ergänzender Bestandteil in die Beratung einfliessen. Dies
+                geschieht ausschliesslich auf deinen ausdrücklichen Wunsch und
+                mit Respekt gegenüber deiner persönlichen Überzeugung.
+              </p>
             </div>
           </div>
+
+          {/* BLOCK 5: Was ich nicht anbiete */}
+          <div
+            className="timeline-block"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              position: "relative",
+              opacity: isScrolled ? 1 : 0,
+              transform: isScrolled ? "translateY(0)" : "translateY(20px)",
+              transition: `opacity ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(4)}ms, transform ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(4)}ms`,
+            }}
+          >
+            <TimelineBgCurve reverse={false} />
+            <div
+              className="timeline-content"
+              style={{
+                width: "45%",
+                paddingRight: "3rem",
+                textAlign: "right",
+                zIndex: 3,
+                padding: "3rem 0",
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 500,
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Was ich nicht anbiete
+              </h2>
+              <p
+                style={{
+                  lineHeight: 1.6,
+                  opacity: 0.9,
+                  marginBottom: "0.8rem",
+                }}
+              >
+                Ich bin nicht in Traumatherapie ausgebildet und biete deshalb
+                keine Traumatherapie an. Wenn du unter schweren Traumafolgen
+                oder akuten psychischen Belastungen leidest, empfehle ich dir,
+                dich an eine entsprechend ausgebildete Fachperson zu wenden.
+              </p>
+              <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
+                Gerne begleite ich Menschen mit belastenden oder traumatischen
+                Lebenserfahrungen im Rahmen meiner fachlichen Möglichkeiten und
+                unterstütze sie auf ihrem persönlichen Entwicklungsweg. Falls
+                erforderlich, kann diese Begleitung ergänzend zu einer
+                therapeutischen Behandlung erfolgen.
+              </p>
+            </div>
+            <TimelineLilyPad rotation={135} xPos="55%" scale={0.7} />
+          </div>
         </section>
+
+        {/* ACCREDITATION SEAL */}
+        <div style={{ textAlign: "center", margin: "1rem auto 4rem auto" }}>
+          <img
+            src="/acc.png"
+            alt="ACC Akkreditierung"
+            style={{
+              maxWidth: "160px",
+              height: "auto",
+              display: "inline-block",
+            }}
+          />
+        </div>
 
         {/* CONTACT FORM SECTION */}
         <section
@@ -1495,14 +1447,13 @@ export default function Landing() {
           style={{
             padding: "4.5rem 3rem",
             maxWidth: "640px",
-            margin: "4rem auto 6rem auto",
+            margin: "0 auto 6rem auto",
             backgroundColor: "var(--primary)",
             borderRadius: "32px 24px 36px 28px",
             overflow: "hidden",
-            boxShadow: "0 10px 30px rgba(19, 37, 109, 0.04)",
+            boxShadow: "0 10px 30px rgba(19, 37, 109, 0.08)",
           }}
         >
-          {/* Key Quote Heading */}
           <h3
             style={{
               fontSize: "1.75rem",
@@ -1535,9 +1486,7 @@ export default function Landing() {
               vereinbaren.
             </p>
 
-            {/* FORMSPREE FORM (WORKS IN OPERA & ALL BROWSERS) */}
             {formStatus.success ? (
-              /* IN-PAGE SUCCESS MESSAGE (NO REDIRECT) */
               <div
                 style={{
                   padding: "2rem",
@@ -1569,7 +1518,6 @@ export default function Landing() {
                   gap: "2.2rem",
                 }}
               >
-                {/* HONEYPOT SPAM TRAP (Invisible to humans, catches bots) */}
                 <input
                   type="text"
                   name="_gotcha"
@@ -1580,7 +1528,6 @@ export default function Landing() {
                   autoComplete="off"
                 />
 
-                {/* Name Input */}
                 <div>
                   <input
                     type="text"
@@ -1603,7 +1550,6 @@ export default function Landing() {
                   />
                 </div>
 
-                {/* Preferred Contact Mode Options */}
                 <div
                   style={{
                     display: "flex",
@@ -1620,7 +1566,6 @@ export default function Landing() {
                   >
                     Bevorzugte Kontaktart:
                   </label>
-
                   <div
                     className="contact-toggle-group"
                     style={{
@@ -1647,7 +1592,7 @@ export default function Landing() {
                             : "transparent",
                         color:
                           contactMode === "email"
-                            ? "var(--background)"
+                            ? "var(--primary)"
                             : "var(--text)",
                         cursor: "pointer",
                         transition: "all 0.25s ease",
@@ -1671,7 +1616,7 @@ export default function Landing() {
                             : "transparent",
                         color:
                           contactMode === "phone"
-                            ? "var(--background)"
+                            ? "var(--primary)"
                             : "var(--text)",
                         cursor: "pointer",
                         transition: "all 0.25s ease",
@@ -1683,7 +1628,6 @@ export default function Landing() {
                   </div>
                 </div>
 
-                {/* Dynamic Email or Phone Input */}
                 <div>
                   {contactMode === "email" ? (
                     <input
@@ -1728,7 +1672,6 @@ export default function Landing() {
                   )}
                 </div>
 
-                {/* Message Input */}
                 <div>
                   <textarea
                     name="message"
@@ -1760,7 +1703,6 @@ export default function Landing() {
                   </p>
                 )}
 
-                {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={formStatus.submitting}
@@ -1782,7 +1724,7 @@ export default function Landing() {
                   onMouseOver={(e) => {
                     if (!formStatus.submitting) {
                       e.currentTarget.style.background = "var(--text)";
-                      e.currentTarget.style.color = "var(--background)";
+                      e.currentTarget.style.color = "var(--primary)";
                     }
                   }}
                   onMouseOut={(e) => {
@@ -1802,7 +1744,6 @@ export default function Landing() {
         </section>
       </div>
 
-      {/* Floating Back-To-Top Chevron Button */}
       <button
         onClick={handleScrollToTop}
         className={`back-to-top-btn ${showBackToTop ? "visible" : ""}`}
@@ -1810,14 +1751,14 @@ export default function Landing() {
         title="Nach oben"
       >
         <svg
-          width="28"
-          height="28"
           viewBox="0 0 24 24"
           fill="none"
           stroke="var(--text)"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
+          width="28"
+          height="28"
         >
           <path d="M18 15l-6-6-6 6" />
         </svg>

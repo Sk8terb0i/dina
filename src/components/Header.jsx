@@ -78,9 +78,10 @@ export default function Header() {
             transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
           }
 
+          /* Match scrolled background with the top color of the ocean gradient (#A1D4C6) */
           .site-header.scrolled {
             padding: 1rem 2rem;
-            background-color: rgba(159, 184, 163, 0.92);
+            background-color: rgba(161, 212, 198, 0.95); 
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 4px 20px rgba(19, 37, 109, 0.05);
@@ -89,7 +90,7 @@ export default function Header() {
           .brand-link {
             display: block;
             flex: 1 1 auto;
-            min-width: 0 !important; /* CRITICAL: Allows text to shrink in flexbox */
+            min-width: 0 !important;
             font-size: 1.1rem;
             letter-spacing: 0.5px;
             white-space: nowrap;
@@ -123,7 +124,7 @@ export default function Header() {
             height: 2px;
             bottom: 0;
             left: 0;
-            background-color: var(--primary, #D0D6CA);
+            background-color: var(--secondary, #f0daf1); /* Nutzt nun den schönen Akzent-Flieder für den Unterstrich */
             transform: scaleX(0);
             transform-origin: bottom right;
             transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
@@ -144,7 +145,7 @@ export default function Header() {
             padding: 0.4rem;
             color: var(--text, #13256d);
             z-index: 101;
-            flex: 0 0 auto !important; /* Never shrink or push away */
+            flex: 0 0 auto !important; 
             margin-left: 0.75rem;
             -webkit-tap-highlight-color: transparent;
           }
@@ -187,7 +188,7 @@ export default function Header() {
               right: 0;
               width: 100%;
               box-sizing: border-box !important;
-              background-color: rgba(159, 184, 163, 0.95);
+              background-color: rgba(161, 212, 198, 0.95);
               backdrop-filter: blur(12px);
               -webkit-backdrop-filter: blur(12px);
               padding: 1.5rem 1.5rem 2rem 1.5rem;

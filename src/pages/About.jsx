@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 
 export default function About() {
@@ -7,7 +8,11 @@ export default function About() {
     canonicalUrl: "https://dinagalizzi.ch/about",
   };
 
-  // The provided Dina SVG, converted to a clean React component
+  // Scroll to top immediately on mount to prevent the "scroll lock" issue
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const DinaPortraitSVG = () => (
     <svg
       viewBox="0 0 161.72 192.99"
@@ -36,7 +41,6 @@ export default function About() {
     </svg>
   );
 
-  // Delicate Wavy Divider to match the organic aesthetic
   const WavyDivider = () => (
     <div
       style={{
@@ -64,11 +68,10 @@ export default function About() {
     <main
       style={{
         "--text": "#13256d",
-        "--background": "#9FB8A3",
+        "--background-solid": "#68B2AD",
         "--primary": "#D0D6CA",
-        "--secondary": "#D0CAD6",
+        "--secondary": "#9FB8A3",
         "--accent": "#e3efff",
-        backgroundColor: "var(--background)",
         color: "var(--text)",
         fontFamily: "'Satoshi', system-ui, sans-serif",
         minHeight: "100vh",
@@ -89,13 +92,13 @@ export default function About() {
             html, #root {
               margin: 0 !important;
               padding: 0 !important;
-              background-color: #9FB8A3 !important;
+              background: linear-gradient(180deg, #A1D4C6 0%, #68B2AD 50%, #3B8F92 100%) !important;
               width: 100% !important;
             }
             body {
               margin: 0 !important;
               padding: 0 !important;
-              background-color: #9FB8A3 !important;
+              background: transparent !important;
               width: 100% !important;
               overflow-x: hidden !important;
               scroll-behavior: auto !important;
@@ -110,7 +113,6 @@ export default function About() {
               padding: 8rem 2rem 6rem 2rem;
             }
 
-            /* --- HERO INTRO SECTION --- */
             .intro-grid {
               display: grid;
               grid-template-columns: 1fr 2fr;
@@ -136,10 +138,12 @@ export default function About() {
               font-size: 1.15rem;
               line-height: 1.7;
               opacity: 0.9;
-              margin: 0;
+              margin-bottom: 1rem;
+            }
+            .intro-text p:last-child {
+              margin-bottom: 0;
             }
 
-            /* --- ORGANIC FEATURE BLOCKS (Motivation & Ausgleich) --- */
             .features-grid {
               display: grid;
               grid-template-columns: 1fr 1fr;
@@ -156,7 +160,6 @@ export default function About() {
               align-items: flex-start;
             }
 
-            /* Leicht abweichende Radien für einen organischen Touch */
             .feature-card:nth-child(1) {
               border-radius: 32px 24px 36px 28px;
             }
@@ -166,7 +169,7 @@ export default function About() {
 
             .feature-icon {
               margin-bottom: 1.25rem;
-              color: var(--accent);
+              color: var(--primary);
               opacity: 1;
               background-color: var(--text);
               width: 48px;
@@ -187,10 +190,12 @@ export default function About() {
               font-size: 1.05rem;
               line-height: 1.6;
               opacity: 0.9;
-              margin: 0;
+              margin-bottom: 1rem;
+            }
+            .feature-card p:last-child {
+              margin-bottom: 0;
             }
 
-            /* --- QUALIFICATIONS CV SECTION (UNBOXED) --- */
             .cv-section {
               padding: 2rem 0;
               max-width: 900px;
@@ -219,7 +224,6 @@ export default function About() {
               opacity: 0.9;
             }
 
-            /* --- MOBILE ADAPTATIONS --- */
             @media (max-width: 768px) {
               .about-container {
                 padding: 8rem 1.25rem 4rem 1.25rem;
@@ -271,7 +275,6 @@ export default function About() {
       </Helmet>
 
       <div className="about-container">
-        {/* Intro Section */}
         <section className="intro-grid">
           <div className="svg-wrapper">
             <DinaPortraitSVG />
@@ -279,20 +282,25 @@ export default function About() {
           <div className="intro-text">
             <h1>Hallo, ich bin Dina Galizzi.</h1>
             <p>
-              Ich bin seit 33 Jahren verheiratet und gemeinsam mit meinem
-              Ehemann habe ich drei erwachsene Söhne. Ursprünglich war ich als
-              Kauffrau in verschiedenen Branchen des internationalen Handels
-              tätig, bevor ich mich zur psychosozialen Beraterin ausbilden
-              liess.
+              Ich bin verheiratet und Mutter von drei erwachsenen Söhnen. Bevor
+              ich mich zur psychosozialen Beraterin ausbilden liess, arbeitete
+              ich als Kauffrau in verschiedenen Bereichen des internationalen
+              Handels. Nach meiner Heirat widmete ich mich während vieler Jahre
+              schwerpunktmässig meiner Familie.
+            </p>
+            <p>
+              Die unterschiedlichen Lebensphasen und Erfahrungen haben mein
+              Verständnis für die vielfältigen Herausforderungen des Lebens
+              vertieft. Sie ermöglichen es mir heute, Menschen mit
+              Lebenserfahrung, Wertschätzung und Einfühlungsvermögen zu
+              begegnen.
             </p>
           </div>
         </section>
 
         <WavyDivider />
 
-        {/* Feature Blocks inside organic boxes */}
         <section className="features-grid">
-          {/* Motivation */}
           <div className="feature-card">
             <div className="feature-icon">
               <svg
@@ -310,13 +318,22 @@ export default function About() {
             </div>
             <h2>Meine Motivation</h2>
             <p>
-              Es fasziniert mich, Menschen ein Stück auf ihrem Weg zu begleiten.
-              Ich liebe es zu sehen, wie Menschen neu aufblühen, neue Facetten
-              ihrer Persönlichkeit entdecken und frische Freiheit erleben.
+              Es fasziniert mich, Menschen ein Stück auf ihrem Lebensweg
+              begleiten zu dürfen. Es erfüllt mich mit Freude zu erleben, wie
+              Menschen aufblühen, neue Seiten ihrer Persönlichkeit entdecken,
+              innere Freiheit gewinnen und mit neuer Hoffnung ihren Weg
+              weitergehen.
+            </p>
+            <p>
+              Ich bin überzeugt, dass jeder Mensch wertvoll ist und die
+              Fähigkeit besitzt, sich weiterzuentwickeln und zu wachsen.
+              Menschen in diesem Prozess begleiten zu dürfen, empfinde ich als
+              grosses Privileg. Dabei ist es mir ein Herzensanliegen, Menschen
+              nicht zu verändern, sondern sie darin zu unterstützen, zu der
+              Persönlichkeit heranzuwachsen, als die sie geschaffen wurden.
             </p>
           </div>
 
-          {/* Balance/Hobbies */}
           <div className="feature-card">
             <div className="feature-icon">
               <svg
@@ -335,20 +352,33 @@ export default function About() {
             </div>
             <h2>Ausgleich im Alltag</h2>
             <p>
-              In meiner Freizeit finde ich Ruhe und Freude in der Musik, beim
-              Lesen, Kochen, Backen und Reisen. Kürzlich habe ich zudem das
-              Töpfern für mich entdeckt, da es mir grosse Freude bereitet,
-              Material direkt mit meinen Händen zu formen.
+              In meiner Freizeit finde ich Freude und Erholung in der Musik,
+              beim Lesen, Kochen, Backen und Reisen. Vor Kurzem habe ich zudem
+              das Töpfern für mich entdeckt. Dabei habe ich einen neuen Zugang
+              zu meiner Kreativität gefunden. Den Ton mit den eigenen Händen zu
+              formen, bereitet mir grosse Freude und schenkt mir Ruhe.
+            </p>
+            <p>
+              Ebenso geniesse ich die Gemeinschaft mit Menschen – sei es bei
+              fröhlichen Begegnungen oder bei tiefgehenden Gesprächen. Solche
+              Momente bereichern mich und erfüllen mich immer wieder aufs Neue.
+              Ich bin überzeugt, dass echte Beziehungen, gegenseitige
+              Wertschätzung und aufrichtiges Interesse am Mitmenschen eine
+              wichtige Grundlage für persönliches Wachstum und ein erfülltes
+              Leben sind.
             </p>
           </div>
         </section>
 
         <WavyDivider />
 
-        {/* Qualifications Section (Unboxed) */}
         <section className="cv-section">
           <h2>Ausbildung & Qualifikationen</h2>
           <div className="cv-list">
+            <div className="cv-text">
+              ACC-akkreditierte psychosoziale Beraterin
+            </div>
+            <div className="cv-text">Begleitende Seelsorgerin (ICL)</div>
             <div className="cv-text">
               Beraterin für Persönlichkeitsentwicklung und Sozialkompetenz auf
               individualpsychologischer Basis (ICL)

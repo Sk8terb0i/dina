@@ -12,7 +12,8 @@ export default function Footer() {
             border-top: 1px solid rgba(19, 37, 109, 0.1);
             font-family: 'Satoshi', system-ui, sans-serif;
             color: var(--text, #13256d);
-            background-color: var(--background, #9FB8A3);
+            /* Transparenter Hintergrund für perfekten Flow mit dem Gradienten */
+            background-color: transparent; 
             font-size: 0.9rem;
           }
 
