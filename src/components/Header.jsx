@@ -29,9 +29,13 @@ export default function Header() {
     e.preventDefault();
     setIsMenuOpen(false);
 
-    navigate("/");
-    fixTrailingSlash();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (location.pathname === "/") {
+      window.dispatchEvent(new CustomEvent("scrollToTop"));
+    } else {
+      navigate("/");
+      fixTrailingSlash();
+      setTimeout(() => window.scrollTo(0, 0), 50);
+    }
   };
 
   const handleContactClick = (e) => {
@@ -39,20 +43,10 @@ export default function Header() {
     setIsMenuOpen(false);
 
     if (location.pathname === "/") {
-      const contactSection = document.getElementById("contact");
-      if (contactSection) {
-        contactSection.scrollIntoView({ behavior: "smooth" });
-      }
+      window.dispatchEvent(new CustomEvent("scrollToContact"));
     } else {
-      navigate("/");
+      navigate("/#contact");
       fixTrailingSlash();
-
-      setTimeout(() => {
-        const contactSection = document.getElementById("contact");
-        if (contactSection) {
-          contactSection.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 300);
     }
   };
 
@@ -76,15 +70,17 @@ export default function Header() {
             font-family: 'Satoshi', system-ui, sans-serif;
             color: #13256d;
             transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+            border-bottom: 1px solid transparent;
           }
 
-          /* Match scrolled background with the top color of the ocean gradient (#A1D4C6) */
+          /* Eleganter Frosted-Glass Effekt, der den Farbverlauf durchscheinen lässt */
           .site-header.scrolled {
             padding: 1rem 2rem;
-            background-color: rgba(161, 212, 198, 0.95); 
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(19, 37, 109, 0.05);
+            background-color: rgba(255, 255, 255, 0.15); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.04);
           }
 
           .brand-link {
@@ -124,7 +120,7 @@ export default function Header() {
             height: 2px;
             bottom: 0;
             left: 0;
-            background-color: var(--secondary, #f0daf1); /* Nutzt nun den schönen Akzent-Flieder für den Unterstrich */
+            background-color: var(--secondary, #f0daf1);
             transform: scaleX(0);
             transform-origin: bottom right;
             transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
@@ -154,7 +150,6 @@ export default function Header() {
             display: none;
           }
 
-          /* Mobile Responsive Adjustments (<= 768px) */
           @media (max-width: 768px) {
             .site-header {
               padding: 1rem 1.25rem !important;
@@ -188,9 +183,10 @@ export default function Header() {
               right: 0;
               width: 100%;
               box-sizing: border-box !important;
-              background-color: rgba(161, 212, 198, 0.95);
-              backdrop-filter: blur(12px);
-              -webkit-backdrop-filter: blur(12px);
+              /* Leicht verdunkelter Glass-Effekt für das Mobile-Menü */
+              background-color: rgba(161, 212, 198, 0.85);
+              backdrop-filter: blur(16px);
+              -webkit-backdrop-filter: blur(16px);
               padding: 1.5rem 1.5rem 2rem 1.5rem;
               gap: 1.25rem;
               box-shadow: 0 10px 25px rgba(19, 37, 109, 0.08);
@@ -199,7 +195,7 @@ export default function Header() {
               pointer-events: none;
               transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
               z-index: 99;
-              border-bottom: 1px solid rgba(19, 37, 109, 0.1);
+              border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             }
 
             .mobile-menu-drawer.open {

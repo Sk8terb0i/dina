@@ -282,11 +282,12 @@ export default function About() {
           <div className="intro-text">
             <h1>Hallo, ich bin Dina Galizzi.</h1>
             <p>
-              Ich bin verheiratet und Mutter von drei erwachsenen Söhnen. Bevor
-              ich mich zur psychosozialen Beraterin ausbilden liess, arbeitete
-              ich als Kauffrau in verschiedenen Bereichen des internationalen
-              Handels. Nach meiner Heirat widmete ich mich während vieler Jahre
-              schwerpunktmässig meiner Familie.
+              Ich bin verheiratet und Mutter von drei erwachsenen Söhnen.
+              Ursprünglich komme ich aus Indonesien, aber bin in der Schweiz
+              aufgewachsen. Bevor ich mich zur psychosozialen Beraterin
+              ausbilden liess, arbeitete ich als Kauffrau in verschiedenen
+              Bereichen des internationalen Handels. Nach meiner Heirat widmete
+              ich mich während vieler Jahre schwerpunktmässig meiner Familie.
             </p>
             <p>
               Die unterschiedlichen Lebensphasen und Erfahrungen haben mein
@@ -328,9 +329,7 @@ export default function About() {
               Ich bin überzeugt, dass jeder Mensch wertvoll ist und die
               Fähigkeit besitzt, sich weiterzuentwickeln und zu wachsen.
               Menschen in diesem Prozess begleiten zu dürfen, empfinde ich als
-              grosses Privileg. Dabei ist es mir ein Herzensanliegen, Menschen
-              nicht zu verändern, sondern sie darin zu unterstützen, zu der
-              Persönlichkeit heranzuwachsen, als die sie geschaffen wurden.
+              grosses Privileg.
             </p>
           </div>
 
@@ -359,7 +358,7 @@ export default function About() {
               formen, bereitet mir grosse Freude und schenkt mir Ruhe.
             </p>
             <p>
-              Ebenso geniesse ich die Gemeinschaft mit Menschen – sei es bei
+              Ebenso geniesse ich die Gemeinschaft mit Menschen, sei es bei
               fröhlichen Begegnungen oder bei tiefgehenden Gesprächen. Solche
               Momente bereichern mich und erfüllen mich immer wieder aufs Neue.
               Ich bin überzeugt, dass echte Beziehungen, gegenseitige
@@ -378,7 +377,6 @@ export default function About() {
             <div className="cv-text">
               ACC-akkreditierte psychosoziale Beraterin
             </div>
-            <div className="cv-text">Begleitende Seelsorgerin (ICL)</div>
             <div className="cv-text">
               Beraterin für Persönlichkeitsentwicklung und Sozialkompetenz auf
               individualpsychologischer Basis (ICL)

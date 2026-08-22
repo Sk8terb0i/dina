@@ -7,24 +7,31 @@ import { Helmet } from "react-helmet-async";
 const DESKTOP_SCROLL_MULTIPLIER = 0.4;
 const DESKTOP_SCROLL_EASING = 0.08;
 
-const TOP_TEXT_SCREEN_OFFSET = "18vh";
-const TOP_TEXT_TO_LILY_GAP = "150px";
-const LILY_TO_BOTTOM_TEXT_GAP = "30px";
+const TOP_SCREEN_OFFSET = "20vh";
 const TIMELINE_TOP_GAP = "6rem";
-
-const HERO_LILY_SIZE = "1000px";
 const TIMELINE_LILY_SIZE = "60px";
 
-const MOBILE_HEADER_TOP_PADDING = "18vh";
-const MOBILE_HERO_LILY_WIDTH = "200vw";
-const MOBILE_HERO_LILY_HEIGHT = "180px";
+// ========================================================
+// HERO LILY SIZING (Easy to edit)
+// ========================================================
+// Desktop
+const DESKTOP_HERO_LILY_WIDTH = "800px";
+const DESKTOP_HERO_LILY_HEIGHT = "500px";
+
+// Mobile
+const MOBILE_HERO_LILY_WIDTH = "70vw";
+const MOBILE_HERO_LILY_HEIGHT = "220px";
 const MOBILE_HERO_LILY_X_OFFSET = "0px";
 
+// ========================================================
+// OTHER CONSTANTS
+// ========================================================
+const MOBILE_HEADER_TOP_PADDING = "16vh";
 const MOBILE_SCROLL_FLIP_THRESHOLD = 2;
 const MOBILE_LILY_FLIP_SPEED = "0.25s";
 const MOBILE_TIMELINE_TOP_GAP = "2rem";
 
-const MOBILE_CONTACT_CARD_WIDTH = "88%";
+const MOBILE_CONTACT_CARD_WIDTH = "92%";
 const MOBILE_CONTACT_CARD_MAX_WIDTH = "420px";
 const MOBILE_CONTACT_CARD_PADDING = "2.2rem 1.25rem";
 
@@ -111,6 +118,7 @@ export default function Landing() {
   const targetScrollY = useRef(0);
   const isAnimatingScroll = useRef(false);
   const touchStartY = useRef(0);
+  const scrollRafId = useRef(null);
 
   useEffect(() => {
     targetScrollY.current = window.scrollY;
@@ -167,7 +175,7 @@ export default function Landing() {
       }
 
       window.scrollTo(0, currentY + diff * DESKTOP_SCROLL_EASING);
-      requestAnimationFrame(smoothScrollLoop);
+      scrollRafId.current = requestAnimationFrame(smoothScrollLoop);
     };
 
     const handleWheel = (e) => {
@@ -189,7 +197,38 @@ export default function Landing() {
 
       if (!isAnimatingScroll.current) {
         isAnimatingScroll.current = true;
-        requestAnimationFrame(smoothScrollLoop);
+        scrollRafId.current = requestAnimationFrame(smoothScrollLoop);
+      }
+    };
+
+    const handleScrollToTopEvent = () => {
+      targetScrollY.current = 0;
+      if (!isAnimatingScroll.current && window.innerWidth >= 768) {
+        isAnimatingScroll.current = true;
+        scrollRafId.current = requestAnimationFrame(smoothScrollLoop);
+      } else if (window.innerWidth < 768) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    };
+
+    const handleScrollToContactEvent = () => {
+      const contactSection = document.getElementById("contact");
+      if (contactSection) {
+        const headerOffset = 100;
+        const y =
+          contactSection.getBoundingClientRect().top +
+          window.scrollY -
+          headerOffset;
+
+        if (window.innerWidth >= 768) {
+          targetScrollY.current = Math.max(0, y);
+          if (!isAnimatingScroll.current) {
+            isAnimatingScroll.current = true;
+            scrollRafId.current = requestAnimationFrame(smoothScrollLoop);
+          }
+        } else {
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
       }
     };
 
@@ -197,26 +236,34 @@ export default function Landing() {
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("scrollToTop", handleScrollToTopEvent);
+    window.addEventListener("scrollToContact", handleScrollToContactEvent);
 
     updateScrollState();
+
+    if (window.location.hash === "#contact") {
+      setTimeout(handleScrollToContactEvent, 250);
+    }
 
     return () => {
       window.removeEventListener("scroll", handleNativeScroll);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("scrollToTop", handleScrollToTopEvent);
+      window.removeEventListener("scrollToContact", handleScrollToContactEvent);
+      if (scrollRafId.current) {
+        cancelAnimationFrame(scrollRafId.current);
+      }
+      isAnimatingScroll.current = false;
     };
   }, []);
 
   const handleScrollToTop = () => {
-    targetScrollY.current = 0;
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.dispatchEvent(new CustomEvent("scrollToTop"));
   };
 
-  const getBlockDelay = (index, totalBlocks = 5) => {
+  const getBlockDelay = (index, totalBlocks = 4) => {
     return isScrolled
       ? index * SECTION_STAGGER_STEP
       : (totalBlocks - 1 - index) * SECTION_STAGGER_STEP;
@@ -313,7 +360,7 @@ export default function Landing() {
         </svg>
       ),
       title: "Vergünstigungen",
-      desc: "Nach Absprache (z.B. für Studierende oder AHV-Bezüger)",
+      desc: "Nach Absprache (z.B. für Studierende, AHV-Bezüger, IV-Bezüger)",
     },
     {
       icon: (
@@ -416,7 +463,7 @@ export default function Landing() {
         </svg>
       ),
       title: "Werteorientierte Beratung",
-      desc: "Ausrichtung an persönlichen Überzeugungen",
+      desc: "Ausrichtung an persönlichen Überzeugungen, Personenzentrierte Beratung nach Karl Rogers",
     },
     {
       icon: (
@@ -453,7 +500,25 @@ export default function Landing() {
         </svg>
       ),
       title: "Gebetsseelsorge",
-      desc: "Auf Wunsch",
+      desc: "Auf Wunsch. Ich bin Christin, und mein Glaube prägt mein Menschenbild sowie meine Werte. Wenn du dies wünschst, kann das Gebet als ergänzender Bestandteil in die Beratung einfliessen. Dies geschieht ausschliesslich auf deinen ausdrücklichen Wunsch und mit Respekt gegenüber deiner persönlichen Überzeugung.",
+    },
+    {
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      ),
+      title: "Keine Traumatherapie",
+      desc: "Bei schweren Traumafolgen oder akuten psychischen Belastungen ist es mir wichtig, dass du die bestmögliche Unterstützung durch eine spezialisierte Fachperson erhältst. Sehr gerne begleite ich dich jedoch einfühlsam bei belastenden Lebenserfahrungen im Rahmen meiner Möglichkeiten. Wenn es für dich hilfreich ist, kann dies auch eine wertvolle Ergänzung zu einer laufenden Therapie sein.",
     },
   ];
 
@@ -507,7 +572,7 @@ export default function Landing() {
         style={{
           position: "absolute",
           left: xPos,
-          top: "50%", // Verbindet das Blatt exakt mit der Mitte der Kurve
+          top: "50%",
           transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
           "--lily-rot": `${rotation}deg`,
           display: "flex",
@@ -522,7 +587,6 @@ export default function Landing() {
           height={computedSize}
           style={{ overflow: "visible" }}
         >
-          {/* Das ABSOLUT REINE Seerosenblatt (nur Fill, absolut KEIN Masken-Stroke!) */}
           <path
             d="M17.68,4.77c1.57.66,3.18,1.56,3.45,4.57.06.7-.25,2.14-.03,2.81.88,2.76,3.83,1.24,3.31-.49-.63-2.12-1.59-2.92-1.89-3.86-.77-2.39.23-3.96,1.85-5.41C27.1-.06,33,.04,36.25,1.72c6.11,3.17,14.17,10.59,10.63,27.13-5.47,25.52-42.23,21.27-45.87-3.34,0,0-3.39-11.81,7.36-19.12,2.85-1.94,6.13-2.95,9.31-1.62Z"
             fill="var(--primary)"
@@ -582,8 +646,13 @@ export default function Landing() {
             * {
               box-sizing: border-box !important;
             }
+
             ::-webkit-scrollbar {
               width: 12px;
+              -webkit-appearance: none;
+            }
+            html::-webkit-scrollbar, body::-webkit-scrollbar {
+              display: block !important;
             }
             ::-webkit-scrollbar-track {
               background: #68B2AD;
@@ -597,10 +666,25 @@ export default function Landing() {
               background: #272e6a;
             }
 
+            .hero-lily-container {
+              width: 100%;
+              max-width: ${DESKTOP_HERO_LILY_WIDTH};
+              height: ${DESKTOP_HERO_LILY_HEIGHT};
+              position: relative;
+              z-index: 2;
+            }
+            
+            .hero-lily-container svg {
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
+            }
+
             .hero-top-text {
               font-size: clamp(1.6rem, 3.5vw, 2.4rem);
               font-weight: 500;
-              margin-bottom: ${TOP_TEXT_TO_LILY_GAP};
+              margin-top: 5rem;
+              margin-bottom: -3rem;
               color: var(--text);
               letter-spacing: -0.02em;
               opacity: 1;
@@ -633,7 +717,6 @@ export default function Landing() {
               margin-bottom: 0.6rem;
             }
 
-            /* Read More Styles */
             .read-more-btn {
               background: none;
               border: none;
@@ -743,37 +826,54 @@ export default function Landing() {
 
             @media (max-width: 768px) {
               .hero-top-text {
-                margin-bottom: 1.5rem !important; /* Verhindert den Desktop-Abstand auf dem Handy */
+                margin-top: 1.5rem !important;
+                margin-bottom: -4rem !important;
               }  
             
               .header-section {
                 padding-top: ${MOBILE_HEADER_TOP_PADDING} !important;
                 padding-left: 1.25rem !important;
                 padding-right: 1.25rem !important;
-                overflow: hidden !important; 
               }
 
               .hero-lily-container {
                 width: 100% !important;
                 height: ${MOBILE_HERO_LILY_HEIGHT} !important;
-                margin: 1.5rem 0 !important;
+                margin: 0 !important;
                 overflow: visible !important;
                 display: flex !important;
                 justify-content: center !important;
                 align-items: center !important;
               }
+
               .hero-lily-container svg {
                 width: ${MOBILE_HERO_LILY_WIDTH} !important; 
-                max-width: none !important;
+                max-width: ${MOBILE_HERO_LILY_WIDTH} !important; 
+                min-width: ${MOBILE_HERO_LILY_WIDTH} !important; 
                 height: auto !important;
+                flex-shrink: 0 !important;
+                transform: translateX(${MOBILE_HERO_LILY_X_OFFSET}) !important;
               }
+
               .hero-lily-container > div {
                 transition: opacity ${MOBILE_LILY_FLIP_SPEED} ease-in-out !important;
               }
 
               .bottom-text-block {
-                margin-top: 1rem !important;
+                margin-top: 0.5rem !important;
                 padding: 0 0.5rem;
+                /* Controls the normal paragraph text at the bottom */
+                font-size: 1.1rem !important; 
+              }
+
+              /* Controls the bold "Schön, dass du..." headline */
+              .bottom-text-block p:first-child {
+                font-size: 1.6rem !important; 
+              }
+
+              /* Controls the bullet point list items */
+              .bottom-text-block .intro-ul li {
+                font-size: 1rem !important; 
               }
 
               .timeline-wrapper {
@@ -801,7 +901,6 @@ export default function Landing() {
                 padding: 0 !important;
               }
               
-              /* STRIKTE REIHENFOLGE: Seerose (Order 1), Text (Order 2) */
               .timeline-content {
                 width: 100% !important;
                 padding: 0 !important;
@@ -846,7 +945,7 @@ export default function Landing() {
               }
 
               .contact-card {
-                width: 100% !important;
+                width: 92% !important;
                 padding: ${MOBILE_CONTACT_CARD_PADDING} !important;
                 margin: 0 auto 3.5rem auto !important;
                 border-radius: 24px !important;
@@ -884,28 +983,14 @@ export default function Landing() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingTop: TOP_TEXT_SCREEN_OFFSET,
+          paddingTop: TOP_SCREEN_OFFSET,
           paddingBottom: "2vh",
           paddingLeft: "2rem",
           paddingRight: "2rem",
           textAlign: "center",
         }}
       >
-        {/* Klarer Text ohne Handschrift, immer oben! */}
-        <h1 className={`hero-top-text ${isScrolled ? "scrolled" : ""}`}>
-          «Dein Weg zu mehr Klarheit und innerer Stärke»
-        </h1>
-
-        <div
-          className="hero-lily-container"
-          style={{
-            position: "relative",
-            width: "100%",
-            maxWidth: HERO_LILY_SIZE,
-            height: "230px",
-            zIndex: 2,
-          }}
-        >
+        <div className="hero-lily-container">
           {/* CLOSED LILY */}
           <div
             style={{
@@ -924,25 +1009,12 @@ export default function Landing() {
             <svg
               id="waterlily_closed"
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 800 300"
-              width="100%"
+              viewBox="0 0 400 300"
             >
               <g id="lily_closed" data-name="lily closed">
                 <path
-                  fill="none"
-                  stroke="var(--secondary)"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.8"
-                  d="M188.39,155.55l26.84-9.08-13.42,20.47s116.56,6.37,92.02-23.18-176.91-15.84-105.45,11.78h0Z"
-                />
-                <path
-                  fill="none"
-                  stroke="var(--secondary)"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.8"
-                  d="M318.81,148.51s-45.2-22.59-54.46-50.99c0,0,11.59-2.9,37.08,0,0,0-15.06-27.23-9.85-49.83,0,0,37.08-1.16,50.99,21.44,0,0,.58-34.18,23.18-39.4,0,0,16.8,9.27,22.59,35.34,0,0,17.38-11,36.5-19.7,0,0,5.51,75.18-15.45,72.86-7.06-.78,12.17-21.15,50.99-20.28,0,0,3.77,48.96-72.14,62.87,0,0-91.3,21.29-57.55-85.46,0,0,42,30.28,32.88,39.98-5.11,5.43-15.79-33.46,27.08-38.67,0,0,16.51,16.37,4.06,60.4-12.45,44.04-33.65-57.28-64.75,2.9-29.12,56.34,161.36-19.7,224.51,53.16,0,0-36.65-10.43-70.98-7.53,0,0,26.65,16.66,21.59,23.18-5.07,6.51-195.79,11.88-116.84-47.95"
+                  fill="var(--accent)"
+                  d="M120.06,172.19c-30.18-6.35-57.18-25.2-74.22-50.83-2.44-3.68-4.71-7.41-6.64-11.47-.27-.57.08-1.27.7-1.38,24.33-4.52,49.82-6.05,74.02.01,0,0-1.24,1.13-1.24,1.13-2.93-21.71-2.47-44.25,4.38-65.21,2.35-6.95,5.56-13.68,9.89-19.68.32-.45.94-.56,1.39-.23,15.78,11.75,34.3,27.9,42.19,46.25,0,0-1.92.48-1.92.48-.27-3.24-.19-6.37.05-9.54.74-9.46,3.29-18.78,7.57-27.26,5.68-11.34,14.73-20.84,25.43-27.57.36-.23.82-.2,1.14.05,12.72,10.32,23.51,23,31.32,37.4,2.6,4.8,4.75,9.85,6.47,15.05,0,0-1.89-.04-1.89-.04,3.63-8.19,10.01-14.72,17.02-20.1,7.04-5.31,14.99-9.26,23.23-12.21.46-.17.97.02,1.2.44,10.33,18.93,18.61,39.32,21.45,60.82.85,7.17.97,14.51-.36,21.7-.76,3.66-1.51,7.26-3.65,10.49-.77,1.28-2.91,2.84-4.62,1.82-2.35-1.43-2.78-4.36-3-6.82-.67-15.75,13.95-26.87,28.07-29.63,7.11-1.61,14.42-1.94,21.63-1.63.55.01.98.48.96,1.03-1.62,7.95-4.01,15.64-6.79,23.21-8.4,22.16-21.41,44.93-43.55,55.63,0,0-.38-1.9-.38-1.9,19.66,1.58,39.48,6.51,56.15,17.35,5.51,3.67,10.56,8.13,14.62,13.43.33.4.28,1-.11,1.34-22.73,18.91-53.49,26.48-82.64,24.27-9.76-.75-19.43-2.5-28.85-5.11,0,0,1.26-.85,1.26-.85-.99,7.29-2.57,14.39-4.45,21.44-5.76,21.08-14.75,41.55-28.35,58.79-.26.35-.72.47-1.11.32-4.18-1.59-7.95-3.74-11.57-6.2-27.2-18.51-32.86-51.33-26.08-81.72,0,0,1.78.8,1.78.8-1.4,1.75-2.91,3.16-4.5,4.57-17.73,14.95-41.27,20.78-63.87,23.11-8.29.81-16.62,1.05-24.93.9-.55,0-1-.45-.98-1,1.9-8.99,5.24-17.53,9.49-25.64,13.66-26.17,37.72-40.43,67.4-36.13,0,0-.85,1.68-.85,1.68-5.24-5.79-9.6-12.14-13.55-18.77-11.78-19.91-18.45-42.9-18.44-66.08,0-.52.41-.95.92-.97,10.85-.41,21.76,1.91,31.38,6.95,3.2,1.68,6.21,3.74,8.99,6.05,0,0-1.63.58-1.63.58,2.15-11.17,9.84-30.66,23.82-19.75,4.96,3.9,15.25,16.26,12.94,22.88-.77,2.3-3.77,2.83-5.72,1.95-5.49-2.23-7.64-8.78-7.03-14.18.79-7.25,4.89-13.52,9.46-18.92,15.7-18.59,24.33-6.99,24.88,12.6.04,7.09.03,14.44-3.03,21.02-1,2.15-3.85,2.87-5.78,1.66-5.04-3.23-5.73-10.27-3.66-15.39,3.69-8.66,13.25-12.35,21.78-14.24,18.26-3.98,18.51,13.41,14.12,26.1-2.38,6.66-5.3,13.58-10.9,18.2-6.85,5.03-9.98-5.25-8.2-10.47,2.79-8.7,10.76-14.31,18-19.14,5.94-3.77,12.15-6.98,18.61-9.75.56-.25,1.23.15,1.27.76,1.85,24.48,2.38,64.86-12.01,85.35-.37.45-1.04-.03-.72-.52,8.14-12.02,10.1-27.09,11.39-41.27,1.07-14.42.77-28.99-.51-43.38,0,0,1.27.76,1.27.76-10.99,4.9-37.68,18.15-35.66,32.44,3.62,19.12,27.7-28.76,13.24-36.52-5.97-3.25-18.31,1.38-23.57,4.99-2.74,1.89-5.05,4.41-6.27,7.43-1.75,4.17-1.2,10.27,2.76,12.88,1.21.71,2.5.31,3.09-.91,1.49-2.84,1.98-6.44,2.38-9.67.78-8.25,1.05-22.98-5.13-29.06-7.03-5.79-18.72,10.27-21.72,15.77-1.6,2.97-2.8,6.18-3.12,9.46-.52,4.68,1.22,10.21,5.74,12.12,1.2.45,2.65.48,3.16-.84,1.56-5.72-7.92-17.13-12.31-20.55-12.19-9.87-18.76,9.14-20.63,18.54-.12.74-1.08,1.05-1.63.57-2.67-2.22-5.56-4.19-8.64-5.82-9.22-4.85-19.91-7.11-30.29-6.72,0,0,.92-1,.92-1,0,22.81,6.57,45.44,18.17,65.04,3.86,6.51,8.23,12.84,13.27,18.4.68.63.03,1.84-.85,1.68-28.86-4.18-52.08,9.64-65.37,35.09-4.14,7.81-7.38,16.27-9.27,24.89,0,0-.96-1.19-.96-1.19,16.46.3,33.04-1,49.03-5.03,15.57-4.14,31.66-10.56,42.63-22.76.63-.86,2.01-.21,1.78.8-1.76,8.34-2.72,16.85-2.53,25.35.12,21.2,9.91,42.41,27.78,54.31,3.47,2.37,7.23,4.49,11.08,5.95l-1.11.32c17.74-22.74,28.05-50.87,32.38-79.22.06-.61.68-1.01,1.26-.85,9.3,2.58,18.84,4.31,28.46,5.04,2.15.23,5.08.25,7.22.37,26.27.45,53.53-7.15,73.91-24.1,0,0-.11,1.34-.11,1.34-7.89-10.28-19.42-17.14-31.39-21.75-12.09-4.58-25.01-7.33-37.88-8.25-.56-.03-.99-.5-.95-1.06.02-.38.25-.69.57-.84,7.08-3.33,13.37-8.23,18.75-13.94,16.06-17.45,25.24-40.44,30.45-63.31,0,0,.94,1.19.94,1.19-16.7-.8-37.78,2.4-45.61,19.18-1.86,4.39-3.19,10.25-.72,14.53.37.45.69.79,1.24.67,1.95-.93,2.82-3.78,3.54-5.86,2.55-8.45,2.62-17.44,1.58-26.2-2.78-21.16-11.03-41.42-21.19-60.05,0,0,1.2.44,1.2.44-15.76,5.72-31.66,15.53-39.05,31.12-.31.9-1.63.82-1.89-.04-5.02-15.31-14.27-28.95-25.3-40.59-3.7-3.87-7.64-7.6-11.79-10.88,0,0,1.14.05,1.14.05-21.33,13.07-33.74,37.58-32.13,62.47.11,1.13-1.52,1.49-1.92.46-1.95-4.72-4.66-9.15-7.75-13.29-9.38-12.4-21.25-22.88-33.74-32.07,0,0,1.39-.23,1.39-.23-16.28,23.2-17.5,56.12-13.92,83.39.13.7-.58,1.31-1.25,1.12-11.86-3.11-24.22-4.03-36.47-3.85-12.26.23-24.6,1.48-36.61,3.86,0,0,.7-1.38.7-1.38,1.78,3.85,4.02,7.62,6.37,11.24,11.9,18.12,28.69,33.05,48.28,42.4,7.86,3.69,16.12,6.53,24.59,8.48.27.06.45.33.38.61-.06.27-.33.44-.6.39h0Z"
                 />
               </g>
             </svg>
@@ -966,37 +1038,31 @@ export default function Landing() {
             <svg
               id="waterlily_open"
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 800 300"
-              width="100%"
+              viewBox="0 0 400 300"
             >
               <g id="lily_open" data-name="lily open">
                 <path
-                  fill="none"
-                  stroke="var(--secondary)"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.8"
-                  d="M316.48,138.42s-50.69-24.91-59.1-42.87c0,0,26.65-5.79,48.38,0,0,0-5.79-34.47,9.27-55.34,0,0,21.44,15.06,27.52,30.13,0,0-2.9-26.36,21.44-41.71,0,0,17.96,13.61,24.63,34.18,0,0,4.92-13.33,26.08-20.86,0,0,18.54,31.87,13.61,54.75-4.92,22.89-18.83-19.12,26.08-17.1,0,0-7.53,39.4-32.73,51.28,0,0,31.87,1.45,46.06,19.99,0,0-26.94,25.2-72.71,12.45,0,0-3.47,29.84-21.44,52.44,0,0-33.89-11.59-24.33-57.07,0,0-14.49,19.41-60.83,18.54,0,0,8.69-45.48,49.83-39.98,0,0-20.86-21.73-20.86-55.34,0,0,14.77-1.16,26.08,8.4,0,0,4.92-26.65,19.12-7.82,14.2,18.83-15.35,11,2.61-10.14,17.96-21.15,17.1,19.12,12.75,22.02s-12.17-13.61,9.56-18.25c21.72-4.63,2.02,38.53-2.61,26.65s23.47-23.47,23.47-23.47c0,0,4.06,39.98-7.53,55.91,0,0,23.47,44.61,66.92,40.27,43.45-4.35-38.24-34.78-38.24,40.27,0,84.11,184.44,68.95,147.46-19.41-34.72-82.94-120.81-26.94-78.51-8.11s-57.99-44.23-56.49,29.55c.27,13.18,14.05,67.06,101.68,27.81,47.22-21.15,31.87-46.35,90.97-39.4s41.43-14.49,90.1-6.37c48.67,8.11,58.52,2.61,58.52,2.61"
+                  fill="var(--primary)"
+                  d="M289.86,163.2c38.31-18.06,49.76-77.96,49.76-77.96-19.04-.86-31.11,3.49-38.48,9.45-1.57-31.82-21.86-66.69-21.86-66.69-32.17,11.45-39.65,31.71-39.65,31.71-10.14-31.27-37.44-51.96-37.44-51.96-37,23.34-32.59,63.41-32.59,63.41-9.24-22.91-41.84-45.81-41.84-45.81-22.9,31.73-14.09,84.13-14.09,84.13-33.04-8.8-73.55,0-73.55,0,0,0,21.72,49.3,80.05,62.2,0,0,6.01,1.36,16.25,2.52h.37c-40.15,10.58-49.5,59.45-49.5,59.45,70.45,1.32,92.48-28.19,92.48-28.19-14.53,69.14,36.99,86.76,36.99,86.76,27.32-34.36,32.59-79.72,32.59-79.72,69.58,19.38,110.54-18.93,110.54-18.93-21.57-28.19-70.02-30.39-70.02-30.39Z"
                 />
                 <path
-                  fill="none"
-                  stroke="var(--secondary)"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.8"
-                  d="M188.39,155.75l26.84-9.08-13.42,20.47s116.56,6.37,92.02-23.18c-24.53-29.55-176.91-15.84-105.45,11.78Z"
+                  fill="var(--accent)"
+                  d="M120.06,172.19c-30.18-6.35-57.18-25.2-74.22-50.83-2.44-3.68-4.71-7.41-6.64-11.47-.27-.57.08-1.27.7-1.38,24.33-4.52,49.82-6.05,74.02.01,0,0-1.24,1.13-1.24,1.13-2.93-21.71-2.47-44.25,4.38-65.21,2.35-6.95,5.56-13.68,9.89-19.68.32-.45.94-.56,1.39-.23,15.78,11.75,34.3,27.9,42.19,46.25,0,0-1.92.48-1.92.48-.27-3.24-.19-6.37.05-9.54.74-9.46,3.29-18.78,7.57-27.26,5.68-11.34,14.73-20.84,25.43-27.57.36-.23.82-.2,1.14.05,12.72,10.32,23.51,23,31.32,37.4,2.6,4.8,4.75,9.85,6.47,15.05l-1.89-.04c3.63-8.19,10.01-14.72,17.02-20.1,7.04-5.31,14.99-9.26,23.23-12.21.46-.17.97.02,1.2.44,10.33,18.93,18.61,39.32,21.45,60.82.85,7.17.97,14.51-.36,21.7-.76,3.66-1.51,7.26-3.65,10.49-.77,1.28-2.91,2.84-4.62,1.82-2.35-1.43-2.78-4.36-3-6.82-.67-15.75,13.95-26.87,28.07-29.63,7.11-1.61,14.42-1.94,21.63-1.63.55.01.98.48.96,1.03-1.62,7.95-4.01,15.64-6.79,23.21-8.4,22.16-21.41,44.93-43.55,55.63,0,0-.38-1.9-.38-1.9,19.66,1.58,39.48,6.51,56.15,17.35,5.51,3.67,10.56,8.13,14.62,13.43.33.4.28,1-.11,1.34-22.73,18.91-53.49,26.48-82.64,24.27-9.76-.75-19.43-2.5-28.85-5.11,0,0,1.26-.85,1.26-.85-.99,7.29-2.57,14.39-4.45,21.44-5.76,21.08-14.75,41.55-28.35,58.79-.26.35-.72.47-1.11.32-4.18-1.59-7.95-3.74-11.57-6.2-27.2-18.51-32.85-51.33-26.08-81.72,0,0,1.78.8,1.78.8-1.4,1.75-2.91,3.16-4.5,4.57-17.73,14.95-41.27,20.78-63.87,23.11-8.29.81-16.62,1.05-24.93.9-.55,0-1-.45-.98-1,1.9-8.99,5.24-17.53,9.49-25.64,13.66-26.17,37.72-40.43,67.4-36.13,0,0-.85,1.68-.85,1.68-5.24-5.79-9.6-12.14-13.55-18.77-11.78-19.91-18.45-42.9-18.44-66.08,0-.52.41-.95.92-.97,10.85-.41,21.76,1.91,31.38,6.95,3.2,1.68,6.21,3.74,8.99,6.05,0,0-1.63.58-1.63.58,2.15-11.17,9.84-30.66,23.82-19.75,4.96,3.9,15.25,16.26,12.94,22.88-.77,2.3-3.77,2.83-5.72,1.95-5.49-2.23-7.64-8.78-7.03-14.18.79-7.25,4.89-13.52,9.46-18.92,15.7-18.59,24.33-6.99,24.88,12.6.04,7.09.03,14.44-3.03,21.02-1,2.15-3.85,2.87-5.78,1.66-5.04-3.23-5.73-10.27-3.66-15.39,3.69-8.66,13.25-12.35,21.78-14.24,18.26-3.98,18.51,13.41,14.12,26.1-2.38,6.66-5.3,13.58-10.9,18.2-6.85,5.03-9.98-5.25-8.2-10.47,2.79-8.7,10.76-14.31,18-19.14,5.94-3.77,12.15-6.98,18.61-9.75.56-.25,1.23.15,1.27.76,1.85,24.48,2.38,64.86-12.01,85.35-.37.45-1.04-.03-.72-.52,8.14-12.02,10.1-27.09,11.39-41.27,1.07-14.42.77-28.99-.51-43.38,0,0,1.27.76,1.27.76-10.99,4.9-37.68,18.15-35.66,32.44,3.62,19.12,27.7-28.76,13.24-36.52-5.97-3.25-18.31,1.38-23.57,4.99-2.74,1.89-5.05,4.41-6.27,7.43-1.75,4.17-1.2,10.27,2.76,12.88,1.21.71,2.5.31,3.09-.91,1.49-2.84,1.98-6.44,2.38-9.67.78-8.25,1.05-22.98-5.13-29.06-7.03-5.79-18.72,10.27-21.72,15.77-1.6,2.97-2.8,6.18-3.12,9.46-.52,4.68,1.22,10.21,5.74,12.12,1.2.45,2.65.48,3.16-.84,1.56-5.72-7.92-17.13-12.31-20.55-12.19-9.87-18.76,9.14-20.63,18.54-.12.74-1.08,1.05-1.63.57-2.67-2.22-5.56-4.19-8.64-5.82-9.22-4.85-19.91-7.11-30.29-6.72,0,0,.92-1,.92-1,0,22.81,6.57,45.44,18.17,65.04,3.86,6.51,8.23,12.84,13.27,18.4.68.63.03,1.84-.85,1.68-28.86-4.18-52.08,9.64-65.37,35.09-4.14,7.81-7.38,16.27-9.27,24.89,0,0-.96-1.19-.96-1.19,16.46.3,33.04-1,49.03-5.03,15.57-4.14,31.66-10.56,42.63-22.76.63-.86,2.01-.21,1.78.8-1.76,8.34-2.72,16.85-2.53,25.35.12,21.2,9.91,42.41,27.78,54.31,3.47,2.37,7.23,4.49,11.08,5.95l-1.11.32c17.74-22.74,28.05-50.87,32.38-79.22.06-.61.68-1.01,1.26-.85,9.3,2.58,18.84,4.31,28.46,5.04,2.15.23,5.08.25,7.22.37,26.27.45,53.53-7.15,73.91-24.1,0,0-.11,1.34-.11,1.34-7.89-10.28-19.42-17.14-31.39-21.75-12.09-4.58-25.01-7.33-37.88-8.25-.56-.03-.99-.5-.95-1.06.02-.38.25-.69.57-.84,7.08-3.33,13.37-8.23,18.75-13.94,16.06-17.45,25.24-40.44,30.45-63.31,0,0,.94,1.19.94,1.19-16.7-.8-37.78,2.4-45.61,19.18-1.86,4.39-3.19,10.25-.72,14.53.37.45.69.79,1.24.67,1.95-.93,2.82-3.78,3.54-5.86,2.55-8.45,2.62-17.44,1.58-26.2-2.78-21.16-11.03-41.42-21.19-60.05,0,0,1.2.44,1.2.44-15.76,5.72-31.66,15.53-39.05,31.12-.31.9-1.63.82-1.89-.04-5.02-15.31-14.27-28.95-25.3-40.59-3.7-3.87-7.64-7.6-11.79-10.88,0,0,1.14.05,1.14.05-21.33,13.07-33.74,37.58-32.13,62.47.11,1.13-1.52,1.49-1.92.46-1.95-4.72-4.66-9.15-7.75-13.29-9.38-12.4-21.25-22.88-33.74-32.07,0,0,1.39-.23,1.39-.23-16.28,23.2-17.5,56.12-13.92,83.39.13.7-.58,1.31-1.25,1.12-11.86-3.11-24.22-4.03-36.47-3.85-12.26.23-24.6,1.48-36.61,3.86,0,0,.7-1.38.7-1.38,1.78,3.85,4.02,7.62,6.37,11.24,11.9,18.12,28.69,33.05,48.28,42.4,7.86,3.69,16.12,6.53,24.59,8.48.27.06.45.33.38.61-.06.27-.33.44-.6.39h0Z"
                 />
               </g>
             </svg>
           </div>
         </div>
 
+        <h1 className={`hero-top-text ${isScrolled ? "scrolled" : ""}`}>
+          «Dein Weg zu mehr Klarheit und innerer Stärke»
+        </h1>
+
         <div
           className={`bottom-text-block ${isScrolled ? "scrolled" : ""}`}
           style={{
             width: "100%",
             maxWidth: "700px",
-            marginTop: LILY_TO_BOTTOM_TEXT_GAP,
             zIndex: 10,
             fontSize: "1.1rem",
             lineHeight: 1.6,
@@ -1050,7 +1116,7 @@ export default function Landing() {
             margin: "0 auto",
             padding: "0 2rem",
             display: "grid",
-            gridTemplateRows: "repeat(5, auto)",
+            gridTemplateRows: "repeat(4, auto)",
             gap: 0,
           }}
         >
@@ -1114,25 +1180,13 @@ export default function Landing() {
                       marginBottom: "0.8rem",
                     }}
                   >
-                    Mein christliches Menschenbild prägt dabei meine Haltung in
-                    der Beratung. Ich bin überzeugt, dass jeder Mensch
-                    einzigartig, von Gott gewollt, wertvoll und mit einer
-                    unverwechselbaren Würde sowie einem persönlichen Potenzial
-                    ausgestattet ist. Diese Grundhaltung fliesst in meine
-                    Beratung ein – unabhängig davon, ob jemand den christlichen
-                    Glauben teilt oder nicht.
-                  </p>
-                  <p
-                    style={{
-                      lineHeight: 1.6,
-                      opacity: 0.9,
-                      marginBottom: "0.8rem",
-                    }}
-                  >
-                    Gemäss einem Grundsatz von Alfred Adler möchte ich «mit den
-                    Augen des anderen sehen, mit den Ohren des anderen hören und
-                    mit dem Herzen des anderen fühlen.» Diese wertschätzende
-                    Haltung bildet die Grundlage meiner Arbeit.
+                    Gemäss einem Grundsatz von Alfred Adler möchte ich{" "}
+                    <strong>
+                      «mit den Augen des anderen sehen, mit den Ohren des
+                      anderen hören und mit dem Herzen des anderen fühlen.»
+                    </strong>{" "}
+                    Diese wertschätzende Haltung bildet die Grundlage meiner
+                    Arbeit.
                   </p>
                   <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
                     In einer vertrauensvollen und geschützten Atmosphäre begeben
@@ -1356,74 +1410,7 @@ export default function Landing() {
                   </div>
                 ))}
               </div>
-              <p style={{ lineHeight: 1.6, opacity: 0.9, marginTop: "1.5rem" }}>
-                Jeder Mensch ist einzigartig. Deshalb passe ich die Methoden
-                individuell an deine persönliche Situation, deine Ziele und
-                deine Bedürfnisse an.
-                <br />
-                <br />
-                Ich bin Christin, und mein Glaube prägt mein Menschenbild sowie
-                meine Werte. Wenn du dies wünschst, kann das Gebet als
-                ergänzender Bestandteil in die Beratung einfliessen. Dies
-                geschieht ausschliesslich auf deinen ausdrücklichen Wunsch und
-                mit Respekt gegenüber deiner persönlichen Überzeugung.
-              </p>
             </div>
-          </div>
-
-          {/* BLOCK 5: Was ich nicht anbiete */}
-          <div
-            className="timeline-block"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              position: "relative",
-              opacity: isScrolled ? 1 : 0,
-              transform: isScrolled ? "translateY(0)" : "translateY(20px)",
-              transition: `opacity ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(4)}ms, transform ${SECTION_FADE_SPEED} ease-out ${getBlockDelay(4)}ms`,
-            }}
-          >
-            <TimelineBgCurve reverse={false} />
-            <div
-              className="timeline-content"
-              style={{
-                width: "45%",
-                paddingRight: "3rem",
-                textAlign: "right",
-                zIndex: 3,
-                padding: "3rem 0",
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: "1.5rem",
-                  fontWeight: 500,
-                  marginBottom: "0.5rem",
-                }}
-              >
-                Was ich nicht anbiete
-              </h2>
-              <p
-                style={{
-                  lineHeight: 1.6,
-                  opacity: 0.9,
-                  marginBottom: "0.8rem",
-                }}
-              >
-                Ich bin nicht in Traumatherapie ausgebildet und biete deshalb
-                keine Traumatherapie an. Wenn du unter schweren Traumafolgen
-                oder akuten psychischen Belastungen leidest, empfehle ich dir,
-                dich an eine entsprechend ausgebildete Fachperson zu wenden.
-              </p>
-              <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
-                Gerne begleite ich Menschen mit belastenden oder traumatischen
-                Lebenserfahrungen im Rahmen meiner fachlichen Möglichkeiten und
-                unterstütze sie auf ihrem persönlichen Entwicklungsweg. Falls
-                erforderlich, kann diese Begleitung ergänzend zu einer
-                therapeutischen Behandlung erfolgen.
-              </p>
-            </div>
-            <TimelineLilyPad rotation={135} xPos="55%" scale={0.7} />
           </div>
         </section>
 
