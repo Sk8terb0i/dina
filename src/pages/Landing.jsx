@@ -1042,7 +1042,7 @@ export default function Landing() {
             >
               <g id="lily_open" data-name="lily open">
                 <path
-                  fill="var(--primary)"
+                  fill="#e8e7e389"
                   d="M289.86,163.2c38.31-18.06,49.76-77.96,49.76-77.96-19.04-.86-31.11,3.49-38.48,9.45-1.57-31.82-21.86-66.69-21.86-66.69-32.17,11.45-39.65,31.71-39.65,31.71-10.14-31.27-37.44-51.96-37.44-51.96-37,23.34-32.59,63.41-32.59,63.41-9.24-22.91-41.84-45.81-41.84-45.81-22.9,31.73-14.09,84.13-14.09,84.13-33.04-8.8-73.55,0-73.55,0,0,0,21.72,49.3,80.05,62.2,0,0,6.01,1.36,16.25,2.52h.37c-40.15,10.58-49.5,59.45-49.5,59.45,70.45,1.32,92.48-28.19,92.48-28.19-14.53,69.14,36.99,86.76,36.99,86.76,27.32-34.36,32.59-79.72,32.59-79.72,69.58,19.38,110.54-18.93,110.54-18.93-21.57-28.19-70.02-30.39-70.02-30.39Z"
                 />
                 <path
@@ -1162,6 +1162,21 @@ export default function Landing() {
                 stets zielgerichtet ist.
               </p>
 
+              <p
+                style={{
+                  lineHeight: 1.6,
+                  opacity: 0.9,
+                  marginBottom: "0.8rem",
+                }}
+              >
+                Gemäss einem Grundsatz von Alfred Adler möchte ich{" "}
+                <strong>
+                  «mit den Augen des anderen sehen, mit den Ohren des anderen
+                  hören und mit dem Herzen des anderen fühlen.»
+                </strong>{" "}
+                Diese wertschätzende Haltung bildet die Grundlage meiner Arbeit.
+              </p>
+
               {!ansatzExpanded && (
                 <button
                   onClick={() => setAnsatzExpanded(true)}
@@ -1173,21 +1188,6 @@ export default function Landing() {
 
               {ansatzExpanded && (
                 <div className="expanded-content">
-                  <p
-                    style={{
-                      lineHeight: 1.6,
-                      opacity: 0.9,
-                      marginBottom: "0.8rem",
-                    }}
-                  >
-                    Gemäss einem Grundsatz von Alfred Adler möchte ich{" "}
-                    <strong>
-                      «mit den Augen des anderen sehen, mit den Ohren des
-                      anderen hören und mit dem Herzen des anderen fühlen.»
-                    </strong>{" "}
-                    Diese wertschätzende Haltung bildet die Grundlage meiner
-                    Arbeit.
-                  </p>
                   <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
                     In einer vertrauensvollen und geschützten Atmosphäre begeben
                     wir uns gemeinsam auf eine Entdeckungsreise. Dabei lernst du
