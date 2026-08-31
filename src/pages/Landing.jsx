@@ -15,12 +15,12 @@ const TIMELINE_LILY_SIZE = "60px";
 // HERO LILY SIZING (Easy to edit)
 // ========================================================
 // Desktop
-const DESKTOP_HERO_LILY_WIDTH = "800px";
-const DESKTOP_HERO_LILY_HEIGHT = "500px";
+const DESKTOP_HERO_LILY_WIDTH = "100vw";
+const DESKTOP_HERO_LILY_HEIGHT = "40vh";
 
 // Mobile
 const MOBILE_HERO_LILY_WIDTH = "70vw";
-const MOBILE_HERO_LILY_HEIGHT = "220px";
+const MOBILE_HERO_LILY_HEIGHT = "30vh";
 const MOBILE_HERO_LILY_X_OFFSET = "0px";
 
 // ========================================================
