@@ -41,6 +41,10 @@ const SECTION_STAGGER_STEP = 600;
 const HERO_TEXT_FADE_SPEED = "1.8s";
 
 export default function Landing() {
+  const [scrollY, setScrollY] = useState(0);
+  const [isMobileView, setIsMobileView] = useState(
+    typeof window !== "undefined" ? window.innerWidth <= 768 : false,
+  );
   const [isScrolled, setIsScrolled] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [contactMode, setContactMode] = useState("email");
@@ -135,6 +139,17 @@ export default function Landing() {
 
       setIsScrolled(currentY > threshold);
       setShowBackToTop(window.scrollY > 400);
+      setScrollY(currentY);
+      setIsMobileView(isMobile);
+    };
+
+    // NEW: Cancels the programmatic animation if the user interrupts
+    const cancelSmoothScroll = () => {
+      if (isAnimatingScroll.current) {
+        isAnimatingScroll.current = false;
+        if (scrollRafId.current) cancelAnimationFrame(scrollRafId.current);
+        targetScrollY.current = window.scrollY;
+      }
     };
 
     const handleNativeScroll = () => {
@@ -145,6 +160,7 @@ export default function Landing() {
     };
 
     const handleTouchStart = (e) => {
+      cancelSmoothScroll(); // Interrupt on mobile touch
       if (window.innerWidth <= 768 && e.touches.length > 0) {
         touchStartY.current = e.touches[0].clientY;
       }
@@ -233,6 +249,7 @@ export default function Landing() {
     };
 
     window.addEventListener("scroll", handleNativeScroll, { passive: true });
+    window.addEventListener("mousedown", cancelSmoothScroll); // NEW: Interrupt on scrollbar click
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("wheel", handleWheel, { passive: false });
@@ -247,6 +264,7 @@ export default function Landing() {
 
     return () => {
       window.removeEventListener("scroll", handleNativeScroll);
+      window.removeEventListener("mousedown", cancelSmoothScroll);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("wheel", handleWheel);
@@ -522,6 +540,13 @@ export default function Landing() {
     },
   ];
 
+  // Creates the soft "bottom up" organic bloom mask position
+  const heroMaskPos = isMobileView
+    ? Math.min(100, Math.max(0, (scrollY / 120) * 100))
+    : isScrolled
+      ? 100
+      : 0;
+
   // ========================================================
   // SANFTE MODULARE SVG-LINIE FÜR JEDEN BLOCK
   // ========================================================
@@ -687,23 +712,9 @@ export default function Landing() {
               margin-bottom: -3rem;
               color: var(--text);
               letter-spacing: -0.02em;
-              opacity: 1;
-              transform: translateY(0);
-              transition: opacity ${HERO_TEXT_FADE_SPEED} ease-in-out, transform ${HERO_TEXT_FADE_SPEED} ease-in-out;
-            }
-            .hero-top-text.scrolled {
-              opacity: 0;
-              transform: translateY(-20px);
             }
 
             .bottom-text-block {
-              opacity: 0;
-              transform: translateY(20px);
-              transition: opacity ${HERO_TEXT_FADE_SPEED} ease-in-out, transform ${HERO_TEXT_FADE_SPEED} ease-in-out;
-            }
-            .bottom-text-block.scrolled {
-              opacity: 1;
-              transform: translateY(0);
             }
 
             .intro-ul {
@@ -863,12 +874,7 @@ export default function Landing() {
                 margin-top: 0.5rem !important;
                 padding: 0 0.5rem;
                 /* Controls the normal paragraph text at the bottom */
-                font-size: 1.1rem !important; 
-              }
-
-              /* Controls the bold "Schön, dass du..." headline */
-              .bottom-text-block p:first-child {
-                font-size: 1.6rem !important; 
+                font-size: 1rem !important; 
               }
 
               /* Controls the bullet point list items */
@@ -889,7 +895,6 @@ export default function Landing() {
               }
 
               .timeline-block, .timeline-block-reverse {
-                opacity: 1 !important;
                 transform: translateY(0) !important;
                 transition: none !important;
                 flex-direction: column !important;
@@ -1002,8 +1007,12 @@ export default function Landing() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              opacity: isScrolled ? 0 : 1,
-              transition: "opacity 0.8s ease-in-out",
+              opacity: isMobileView
+                ? Math.max(0, 1 - scrollY / 120)
+                : isScrolled
+                  ? 0
+                  : 1,
+              transition: isMobileView ? "none" : "opacity 0.8s ease-in-out",
             }}
           >
             <svg
@@ -1020,7 +1029,7 @@ export default function Landing() {
             </svg>
           </div>
 
-          {/* OPEN LILY */}
+          {/* OPEN LILY ORGANIC BLOOM MASK */}
           <div
             style={{
               position: "absolute",
@@ -1031,8 +1040,18 @@ export default function Landing() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              opacity: isScrolled ? 1 : 0,
-              transition: "opacity 0.8s ease-in-out",
+              zIndex: 2,
+              WebkitMaskImage:
+                "linear-gradient(to bottom, transparent 0%, transparent 35%, black 65%, black 100%)",
+              WebkitMaskSize: "100% 300%",
+              WebkitMaskPosition: `0% ${heroMaskPos}%`,
+              maskImage:
+                "linear-gradient(to bottom, transparent 0%, transparent 35%, black 65%, black 100%)",
+              maskSize: "100% 300%",
+              maskPosition: `0% ${heroMaskPos}%`,
+              transition: isMobileView
+                ? "none"
+                : "mask-position 1s ease-out, -webkit-mask-position 1s ease-out",
             }}
           >
             <svg
@@ -1054,40 +1073,55 @@ export default function Landing() {
           </div>
         </div>
 
-        <h1 className={`hero-top-text ${isScrolled ? "scrolled" : ""}`}>
-          «Dein Weg zu mehr Klarheit und innerer Stärke»
+        <h1
+          className="hero-top-text"
+          style={{
+            opacity: isMobileView
+              ? Math.max(0, 1 - scrollY / 120)
+              : isScrolled
+                ? 0
+                : 1,
+            transform: isMobileView
+              ? `translateY(-${scrollY * 0.6}px)`
+              : isScrolled
+                ? "translateY(-40px)"
+                : "translateY(0)",
+            transition: isMobileView
+              ? "none"
+              : "opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)",
+            position: "relative",
+            zIndex: 1,
+            willChange: "transform, opacity",
+          }}
+        >
+          Schön, dass du den Weg hierher gefunden hast.
         </h1>
 
         <div
-          className={`bottom-text-block ${isScrolled ? "scrolled" : ""}`}
+          className="bottom-text-block"
           style={{
             width: "100%",
             maxWidth: "700px",
             zIndex: 10,
             fontSize: "1.1rem",
             lineHeight: 1.6,
+            position: "relative",
+            opacity: isMobileView
+              ? Math.min(1, scrollY / 80)
+              : isScrolled
+                ? 1
+                : 0,
+            transform: isMobileView
+              ? `translateY(${Math.max(0, 60 - scrollY * 0.9)}px)`
+              : isScrolled
+                ? "translateY(0)"
+                : "translateY(60px)",
+            transition: isMobileView
+              ? "none"
+              : "opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)",
+            willChange: "transform, opacity",
           }}
         >
-          <p
-            style={{
-              fontWeight: 500,
-              marginBottom: "1.5rem",
-              fontSize: "1.2rem",
-            }}
-          >
-            Schön, dass du den Weg hierher gefunden hast.
-          </p>
-          <p style={{ margin: 0 }}>«Du bist hier richtig, wenn du…</p>
-          <ul className="intro-ul">
-            <li>
-              …in einer schwierigen Lebenssituation steckst und Neuorientierung
-              suchst.
-            </li>
-            <li>…dich von destruktiven Denkmustern befreien möchtest.</li>
-            <li>
-              …deine eigene Berufung und deine Stärken (wieder)finden willst.»
-            </li>
-          </ul>
           <p style={{ opacity: 0.9 }}>
             Sich Unterstützung zu holen, ist der erste Schritt auf dem Weg zur
             Veränderung. In meiner psychosozialen Beratung begleite ich dich
